@@ -1,5 +1,49 @@
-extends layout
-
-block content
-  h1= title
-  p Welcome to #{title}
+doctype html
+html
+  head
+    link(href='http://fonts.googleapis.com/css?family=Titillium+Web:400,300,600', rel='stylesheet', type='text/css')
+    link(rel='stylesheet', href='/stylesheets/style.css')
+    title Welcome to Facial Recognition
+  body
+  .form
+      h1.title Welcome to Facial Recognition
+      ul.tab-group
+         li.tab.active 
+           a(href='#signup') Sign Up
+         li.tab 
+           a(href='#login') Log In
+      .tab-content
+        #signup
+          h1 Sign Up is Easy!
+          form(action='/', method='post')
+            .field-wrap
+              label User Name
+              input(type='text' required autocomplete='off')
+            .mid-row
+              .field-wrap
+                label First Name
+                input(type='text' required autocomplete='off')
+              .field-wrap
+                label Last Name
+                input(type='text' required autocomplete='off')
+            .field-wrap
+               label Email
+               input(type='email' required autocomplete='off')
+            .field-wrap
+               label Set A Password
+               input(type='password' required autocomplete='off')
+            button(type='submit', class='button button-block') Get Started
+        #login
+          h1 Welcome Back!
+          form(action='/', method='post')
+            .field-wrap
+              label User Name
+              input(type='text' required autocomplete='off')
+            .field-wrap
+              label Password
+              input(type='password' required autocomplete='off')
+            p.forgot
+              a(href='forgot.html') Forgot Password?
+            button.button.button-block Log In
+  script(src='http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js')
+  script(src='/javascripts/global.js')
