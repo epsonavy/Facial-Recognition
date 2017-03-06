@@ -1,7 +1,8 @@
 $(document).ready(function () {
-    var $video, $upfile, $box, $progress, $list;
+    var $video, $player, $upfile, $box, $progress, $list;
 
-    $video    = $('#video');
+    //$video    = $('#video');
+    $player   = $('#my-player');
     $upfile   = $('#upload-file');
     $box      = $('#upload-box');
     $progress = $('#progress');
@@ -23,7 +24,8 @@ $(document).ready(function () {
 
     client.on('stream', function (stream) {
         video.download(stream, function (err, src) {
-            $video.attr('src', src);
+            //$video.attr('src', src);
+            videojs('my-player').src(src);
         });
     });
 
