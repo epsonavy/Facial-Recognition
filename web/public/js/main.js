@@ -1,7 +1,7 @@
 $(document).ready(function () {
     var $video, $player, $upfile, $box, $progress, $list;
 
-    //$video    = $('#video');
+    $video    = $('#video');
     $player   = $('#my-player');
     $upfile   = $('#upload-file');
     $box      = $('#upload-box');
@@ -24,8 +24,21 @@ $(document).ready(function () {
 
     client.on('stream', function (stream) {
         video.download(stream, function (err, src) {
-            //$video.attr('src', src);
+            $video.attr('src', src);
             videojs('my-player').src(src);
+            videojs("my-player").ready(function(){
+              var myPlayer = this;
+
+              // EXAMPLE: Start playing the video.
+              myPlayer.play();
+
+            });
+            /*
+            videojs('my-player').src([
+			  { type: "video/mp4", src: src+".mp4" },
+			  { type: "video/webm", src: src+".webm" },
+			  { type: "video/ogg", src: src+".ogv" }
+			]);*/
         });
     });
 
