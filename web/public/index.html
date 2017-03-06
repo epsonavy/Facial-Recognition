@@ -6,6 +6,8 @@
     <link href='http://fonts.googleapis.com/css?family=Titillium+Web:400,300,600' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <link rel="stylesheet" type="text/css" href="/css/style2.css">
+    <link href="//vjs.zencdn.net/5.11/video-js.min.css" rel="stylesheet">
+    <script src="//vjs.zencdn.net/5.11/video.min.js"></script>
 
 </head>
 
@@ -15,9 +17,10 @@
 
     <div class="profile">
         <table>
-            <tr><td id="first-col" rowspan="4"><img id="pic" src="profile.png"></td><td>username</td></tr>
+            <tr><td id="first-col" rowspan="5"><img id="pic" src="profile.png"></td><td>Username</td></tr>
             <tr><td>FirstName</td></tr>
             <tr><td>LastName</td></tr>
+            <tr><td>Last Login: 10:20:45 PM</td></tr>
             <tr><td>IP: 127.0.0.1</td></tr>
         </table>
     </div>
@@ -44,10 +47,32 @@
                 <nav id="list"></nav>
             </fieldset>
 
+
             <fieldset>
                 <legend>Video to be played</legend>
 
                 <video id="video"></video>
+            </fieldset>
+
+            <fieldset>
+                <legend>Can be played on phone</legend>
+
+                <video
+                    id="my-player"
+                    class="video-js"
+                    controls
+                    preload="auto"
+                    poster="//vjs.zencdn.net/v/oceans.png"
+                    data-setup='{}'>
+                  <source id="video2" src="//vjs.zencdn.net/v/oceans.mp4">
+                  <p class="vjs-no-js">
+                    To view this video please enable JavaScript, and consider upgrading to a
+                    web browser that
+                    <a href="http://videojs.com/html5-video-support/" target="_blank">
+                      supports HTML5 video
+                    </a>
+                  </p>
+                </video>
             </fieldset>
 
     </div>

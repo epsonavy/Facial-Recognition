@@ -5,15 +5,15 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
-// add these two lines near the variable declarations at the top
+// add BinaryServer here
 var BinaryServer = require('binaryjs').BinaryServer;
 var video        = require('./lib/video');
 
-// add this after the call to server.listen()
+// BinaryServer on port 9000
 var bs = new BinaryServer({ port: 9000 });
 
 /*
-// Mongo
+// Mongo (not use)
 var mongo = require('mongodb');
 var monk = require('monk');
 var db = monk('localhost:27017/nodetest1');
@@ -23,7 +23,7 @@ var users = require('./routes/users');
 */
 var app = express();
 
-// view engine setup
+// view engine setup (not use)
 //app.set('views', path.join(__dirname, 'views'));
 //app.set('view engine', 'jade');
 
@@ -35,7 +35,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-/*
+/* (not use)
 // Make our db accessible to our router
 app.use(function(req,res,next){
     req.db = db;
@@ -64,7 +64,7 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-
+// Binaryserver <==> ./lib/video.js
 bs.on('connection', function (client) {
     client.on('stream', function (stream, meta) {
         switch(meta.event) {

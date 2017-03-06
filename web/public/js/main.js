@@ -9,7 +9,7 @@ $(document).ready(function () {
 
     $video.attr({
         controls : true,
-        autoplay : true
+        autoplay : false
     });
 
     client.on('open', function () {

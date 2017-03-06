@@ -43,6 +43,7 @@ legend {
 }
 
 #progress {
+    font-size: 10pt;
     color: grey;
     width: 70%;
     height: 20%;
@@ -72,6 +73,11 @@ li:before {
     content: "•";
     padding-right: 4px;
     color: white; /* or whatever color you prefer */
+}
+
+#my-player {
+    width: auto;
+    height: 240px;
 }
 
 #video {
