@@ -109,7 +109,6 @@ router.post('/api/adduser', (req, res, next) => {
 
 // Update 
 // curl -X PUT --data "username=test5&password=789&first_name=first&last_name=last&email=123@test.com" http://127.0.0.1:3000/api/updateuser/2
-
 router.put('/api/updateuser/:user_id', (req, res, next) => {
     // Get IP
     function getIP() {
