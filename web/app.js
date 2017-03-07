@@ -17,15 +17,15 @@ var bs = new BinaryServer({ port: 9000 });
 var mongo = require('mongodb');
 var monk = require('monk');
 var db = monk('localhost:27017/nodetest1');
-
-var index = require('./routes/index');
-var users = require('./routes/users');
 */
+var index = require('./routes/index');
+//var users = require('./routes/users');
+
 var app = express();
 
-// view engine setup (not use)
-//app.set('views', path.join(__dirname, 'views'));
-//app.set('view engine', 'jade');
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'jade');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
