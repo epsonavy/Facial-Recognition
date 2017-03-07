@@ -107,8 +107,59 @@ router.post('/api/adduser', (req, res, next) => {
 });
 
 
-// Update data
+// Update 
+// curl -X PUT --data "username=test5&password=789&first_name=first&last_name=last&email=123@test.com" http://127.0.0.1:3000/api/updateuser/2
 
+router.put('/api/updateuser/:user_id', (req, res, next) => {
+    // Get IP
+    function getIP() {
+      var str = req.headers['x-forwarded-for'] || 
+         req.connection.remoteAddress || 
+         req.socket.remoteAddress ||
+         req.connection.socket.remoteAddress;
+
+      var res = str.split(":");
+      return res[res.length - 1];
+    }
+    // Grab data from the URL parameters
+    const id = req.params.user_id;
+
+    // Grab data from http request
+    const data = {
+      username: req.body.username,
+      password: req.body.password,
+      first_name: req.body.first_name,
+      last_name: req.body.last_name,
+      last_login_time: new Date(Date.now()),
+      last_login_ip: getIP(),
+      email: req.body.email
+    };
+
+    pool.connect(function(err, client, done) {
+      if(err) {
+        return console.error('error fetching client from pool', err);
+      }
+      client.query('UPDATE userdata SET username=($1), password=($2), first_name=($3), last_name=($4), last_login_time=($5), last_login_ip=($6), email=($7) WHERE id=($8)', [data.username, data.password, data.first_name, data.last_name, data.last_login_time, data.last_login_ip, data.email, id], function(err, result) {
+        //call `done(err)` to release the client back to the pool (or destroy it if there is an error) 
+        done(err);
+     
+        if(err) {
+          return console.error('error running query', err);
+        }
+        return res.json(result);
+      });
+    });
+     
+    pool.on('error', function (err, client) {
+      // if an error is encountered by a client while it sits idle in the pool 
+      // the pool itself will emit an error event with both the error and 
+      // the client which emitted the original error 
+      // this is a rare occurrence but can happen if there is a network partition 
+      // between your application and the database, the database restarts, etc. 
+      // and so you might want to handle it and at least log it out 
+      console.error('idle client error', err.message, err.stack)
+    }) 
+});
 
 
 
