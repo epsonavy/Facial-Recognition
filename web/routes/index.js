@@ -57,6 +57,16 @@ router.get('/api/getusers', (req, res, next) => {
 // Insert data
 //curl --data "username=test&password=789&first_name=first&last_name=last" http://127.0.0.1:3000/api/adduser
 router.post('/api/adduser', (req, res, next) => {
+    // Get IP
+    function getIP() {
+      var str = req.headers['x-forwarded-for'] || 
+         req.connection.remoteAddress || 
+         req.socket.remoteAddress ||
+         req.connection.socket.remoteAddress;
+
+      var res = str.split(":");
+      return res[res.length - 1];
+    }
 
     // Grab data from http request
     const data = {
@@ -65,7 +75,7 @@ router.post('/api/adduser', (req, res, next) => {
       first_name: req.body.first_name,
       last_name: req.body.last_name,
       last_login_time: new Date(Date.now()),
-      last_login_ip: "0.0.0.0"
+      last_login_ip: getIP()
     };
 
     pool.connect(function(err, client, done) {
@@ -97,6 +107,9 @@ router.post('/api/adduser', (req, res, next) => {
 
 
 // Update data
+
+
+
 
 
 module.exports = router;
