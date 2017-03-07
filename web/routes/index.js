@@ -24,8 +24,7 @@ var config = {
 var pool = new pg.Pool(config);
 
 // Fetch data from psql
-router.get('/api/read', (req, res, next) => {
-    const results = [];
+router.get('/api/getusers', (req, res, next) => {
     // to run a query we can acquire a client from the pool, 
     // run a query on the client, and then return the client to the pool 
     pool.connect(function(err, client, done) {
@@ -56,7 +55,45 @@ router.get('/api/read', (req, res, next) => {
 });
 
 // Insert data
-//curl --data "text=test&complete=false" http://127.0.0.1:3000/api/insert
+//curl --data "username=test&password=789&first_name=first&last_name=last" http://127.0.0.1:3000/api/adduser
+router.post('/api/adduser', (req, res, next) => {
+
+    // Grab data from http request
+    const data = {
+      username: req.body.username,
+      password: req.body.password,
+      first_name: req.body.first_name,
+      last_name: req.body.last_name,
+      last_login_time: new Date(Date.now()),
+      last_login_ip: "0.0.0.0"
+    };
+
+    pool.connect(function(err, client, done) {
+      if(err) {
+        return console.error('error fetching client from pool', err);
+      }
+      client.query('INSERT INTO userdata(username, password, first_name, last_name, last_login_time, last_login_ip) values($1, $2, $3, $4, $5, $6)', [data.username, data.password, data.first_name, data.last_name, data.last_login_time, data.last_login_ip], function(err, result) {
+        //call `done(err)` to release the client back to the pool (or destroy it if there is an error) 
+        done(err);
+     
+        if(err) {
+          return console.error('error running query', err);
+        }
+        return res.json(result);
+        //console.log(result.rows[0]);
+      });
+    });
+     
+    pool.on('error', function (err, client) {
+      // if an error is encountered by a client while it sits idle in the pool 
+      // the pool itself will emit an error event with both the error and 
+      // the client which emitted the original error 
+      // this is a rare occurrence but can happen if there is a network partition 
+      // between your application and the database, the database restarts, etc. 
+      // and so you might want to handle it and at least log it out 
+      console.error('idle client error', err.message, err.stack)
+    }) 
+});
 
 
 // Update data
