@@ -55,7 +55,7 @@ router.get('/api/getusers', (req, res, next) => {
 });
 
 // Insert data
-//curl --data "username=test&password=789&first_name=first&last_name=last" http://127.0.0.1:3000/api/adduser
+// curl --data "username=test4&password=789&first_name=first&last_name=last&email=123@test.com" http://127.0.0.1:3000/api/adduser
 router.post('/api/adduser', (req, res, next) => {
     // Get IP
     function getIP() {
@@ -75,14 +75,15 @@ router.post('/api/adduser', (req, res, next) => {
       first_name: req.body.first_name,
       last_name: req.body.last_name,
       last_login_time: new Date(Date.now()),
-      last_login_ip: getIP()
+      last_login_ip: getIP(),
+      email: req.body.email
     };
 
     pool.connect(function(err, client, done) {
       if(err) {
         return console.error('error fetching client from pool', err);
       }
-      client.query('INSERT INTO userdata(username, password, first_name, last_name, last_login_time, last_login_ip) values($1, $2, $3, $4, $5, $6)', [data.username, data.password, data.first_name, data.last_name, data.last_login_time, data.last_login_ip], function(err, result) {
+      client.query('INSERT INTO userdata(username, password, first_name, last_name, last_login_time, last_login_ip, email) values($1, $2, $3, $4, $5, $6, $7)', [data.username, data.password, data.first_name, data.last_name, data.last_login_time, data.last_login_ip, data.email], function(err, result) {
         //call `done(err)` to release the client back to the pool (or destroy it if there is an error) 
         done(err);
      
