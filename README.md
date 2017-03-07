@@ -1,9 +1,9 @@
 # Facial-Recognition
 
-====================
-Postgres SQL setting:
 
+*Postgres SQL setting:*
 
+~~~~~~~~~~~~~~~~~~~
 const express = require('express');
 const router = express.Router();
 
@@ -28,4 +28,4 @@ var config = {
 //it will keep idle connections open for a 30 seconds 
 //and set a limit of maximum 10 idle clients 
 var pool = new pg.Pool(config);
-
+~~~~~~~~~~~~~~~~~~~~
