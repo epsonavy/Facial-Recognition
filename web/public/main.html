@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome</title>
+    <link href='http://fonts.googleapis.com/css?family=Titillium+Web:400,300,600' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="/css/style2.css">
+    <link href="//vjs.zencdn.net/5.11/video-js.min.css" rel="stylesheet">
+    <script src="//vjs.zencdn.net/5.11/video.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="/js/lib/binary.js"></script>
+    <script src="/js/lib/common.js"></script>
+    <script src="/js/lib/video.js"></script>
+    <script src="/js/main.js"></script>
+
+</head>
+
+<body>
+<div class="form">
+    <h1 class="title">Welcome</h1>
+
+    <div class="profile">
+        <table>
+            <tr><td id="first-col" rowspan="5"><img id="pic" src="profile.png"></td><td>Username</td></tr>
+            <tr><td>FirstName</td></tr>
+            <tr><td>LastName</td></tr>
+            <tr><td>Last Login: 10:20:45 PM</td></tr>
+            <tr><td>IP: 127.0.0.1</td></tr>
+        </table>
+    </div>
+
+    <div class="center-area">
+        <fieldset>
+                <legend>Select a file</legend>
+                <aside id="select-box">
+                    <input id="upload-file" type="file" accept="video/*;capture=camcorder">
+                    <article id="progress">Upload Video from phone here</article>
+                </aside>
+        </fieldset>
+        <fieldset>
+                <legend>Drag n Drop</legend>
+                <aside id="upload-box">
+                    <article id="progress">Drop Video from PC here</article>
+                </aside>
+            </fieldset>
+
+            <fieldset>
+                <legend>Current Videos in Server</legend>
+
+                <nav id="list"></nav>
+            </fieldset>
+
+            <fieldset>
+                <legend>Video Player</legend>
+
+                <video
+                    id="my-player"
+                    class="video-js" controls="true" data-setup="{}">
+                  <source src="//vjs.zencdn.net/v/oceans.mp4">
+                  <p class="vjs-no-js">
+                    To view this video please enable JavaScript, and consider upgrading to a
+                    web browser that
+                    <a href="http://videojs.com/html5-video-support/" target="_blank">
+                      supports HTML5 video
+                    </a>
+                  </p>
+                </video>
+            </fieldset>
+
+    </div>
+
+    <div class="tab-content">
+
+            <form action="/" method="post">
+
+                <button type="submit" class="button button-block"/>Log Out</button>
+
+            </form>
+
+    </div><!-- tab-content css class-->
+
+</div> <!-- /form css class-->
+
+</body>
+</html>

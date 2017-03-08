@@ -12,13 +12,8 @@ var video        = require('./lib/video');
 // BinaryServer on port 9000
 var bs = new BinaryServer({ port: 9000 });
 
-/*
-// Mongo (not use)
-var mongo = require('mongodb');
-var monk = require('monk');
-var db = monk('localhost:27017/nodetest1');
-*/
 var index = require('./routes/index');
+var auth = require('./routes/auth');
 var users = require('./routes/users');
 
 var app = express();
@@ -35,14 +30,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-/* (not use)
-// Make our db accessible to our router
-app.use(function(req,res,next){
-    req.db = db;
-    next();
-});
-*/
 app.use('/', index);
+app.use('/auth', auth);
 app.use('/users', users);
 
 

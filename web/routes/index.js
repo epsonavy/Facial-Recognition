@@ -23,6 +23,122 @@ var config = {
 //and set a limit of maximum 10 idle clients 
 var pool = new pg.Pool(config);
 
+// Login
+router.post('/api/login', (req, res, next) => {
+    // Get IP
+    function getIP() {
+      var str = req.headers['x-forwarded-for'] || 
+         req.connection.remoteAddress || 
+         req.socket.remoteAddress ||
+         req.connection.socket.remoteAddress;
+
+      var res = str.split(":");
+      return res[res.length - 1];
+    }
+
+    // Grab data from http request
+    const data = {
+      username: req.body.username,
+      password: req.body.password,
+      last_login_time: new Date(Date.now()),
+      last_login_ip: getIP()
+    };
+
+    pool.connect(function(err, client, done) {
+      if(err) {
+        return console.error('error fetching client from pool', err);
+      }
+      client.query('SELECT id, username, password FROM userdata WHERE username=$1 and password=$2', [data.username, data.password], function(err, result) {
+        //call `done(err)` to release the client back to the pool (or destroy it if there is an error) 
+        done(err);
+     
+        if(err) {
+          return console.error('error running query', err);
+        }
+
+        // if found user data
+        if (result.rows[0]) {
+          return res.redirect('/main.html');
+        } else {
+          return res.redirect('/wrongpassword.html');
+        }
+      });
+    });
+     
+    pool.on('error', function (err, client) {
+      console.error('idle client error', err.message, err.stack)
+    }) 
+});
+
+// Register
+router.post('/api/register', (req, res, next) => {
+    // Get IP
+    function getIP() {
+      var str = req.headers['x-forwarded-for'] || 
+         req.connection.remoteAddress || 
+         req.socket.remoteAddress ||
+         req.connection.socket.remoteAddress;
+
+      var res = str.split(":");
+      return res[res.length - 1];
+    }
+
+    // Grab data from http request
+    const data = {
+      username: req.body.username,
+      password: req.body.password,
+      first_name: req.body.first_name,
+      last_name: req.body.last_name,
+      last_login_time: new Date(Date.now()),
+      last_login_ip: getIP(),
+      email: req.body.email
+    };
+
+    var isDuplicated = false;
+    pool.connect(function(err, client, done) {
+      if(err) {
+        return console.error('error fetching client from pool', err);
+      }
+      client.query('SELECT username FROM userdata', function(err, result) {
+        //call `done(err)` to release the client back to the pool (or destroy it if there is an error) 
+        done(err);
+     
+        if(err) {
+          return console.error('error running query', err);
+        }
+
+        //return res.json(result.rows.length);
+        // username duplicate check
+        
+        function checkExist() {
+            var i = null;
+            for (i = 0; result.rows.length > i; i += 1) {
+                if (result.rows[i].username === data.username) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        isDuplicated = checkExist();
+        if (isDuplicated) {
+          return res.redirect('/');
+        } else {
+          return res.redirect('/main.html');
+        } 
+
+      });
+
+
+
+    });
+     
+    pool.on('error', function (err, client) {
+      console.error('idle client error', err.message, err.stack)
+    }) 
+});
+
+
 // Fetch data from psql
 router.get('/api/getusers', (req, res, next) => {
     // to run a query we can acquire a client from the pool, 
@@ -44,12 +160,6 @@ router.get('/api/getusers', (req, res, next) => {
     });
      
     pool.on('error', function (err, client) {
-      // if an error is encountered by a client while it sits idle in the pool 
-      // the pool itself will emit an error event with both the error and 
-      // the client which emitted the original error 
-      // this is a rare occurrence but can happen if there is a network partition 
-      // between your application and the database, the database restarts, etc. 
-      // and so you might want to handle it and at least log it out 
       console.error('idle client error', err.message, err.stack)
     }) 
 });
@@ -96,12 +206,6 @@ router.post('/api/adduser', (req, res, next) => {
     });
      
     pool.on('error', function (err, client) {
-      // if an error is encountered by a client while it sits idle in the pool 
-      // the pool itself will emit an error event with both the error and 
-      // the client which emitted the original error 
-      // this is a rare occurrence but can happen if there is a network partition 
-      // between your application and the database, the database restarts, etc. 
-      // and so you might want to handle it and at least log it out 
       console.error('idle client error', err.message, err.stack)
     }) 
 });
@@ -159,8 +263,6 @@ router.put('/api/updateuser/:user_id', (req, res, next) => {
       console.error('idle client error', err.message, err.stack)
     }) 
 });
-
-
 
 
 module.exports = router;
