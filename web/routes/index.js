@@ -3,10 +3,6 @@ const router = express.Router();
 
 var pgp = require('pg-promise')();
  
-// create a config to configure both pooling behavior 
-// and client options 
-// note: all config is optional and the environment variables 
-// will be read if the config is not present 
 var config = {
   user: 'postgres', 
   database: 'postgres',
@@ -31,7 +27,7 @@ router.post('/api/login', (req, res, next) => {
     }
 
     // Grab data from http request
-    const data = {
+    const reqData = {
       username: req.body.username,
       password: req.body.password,
       last_login_time: Date.now(),
@@ -41,8 +37,8 @@ router.post('/api/login', (req, res, next) => {
 
     db.tx(t=> {
         return t.batch([
-            t.one("SELECT username, password, first_name, last_name, last_login_time, last_login_ip FROM userdata WHERE username=$1 and password=$2", [data.username, data.password]),
-            t.none("UPDATE userdata SET last_login_time=now()::timestamp, last_login_ip=($1) WHERE username=($2)", [data.last_login_ip, data.username])
+            t.one("SELECT username, password, first_name, last_name, last_login_time, last_login_ip FROM userdata WHERE username=$1 and password=$2", [reqData.username, reqData.password]),
+            t.none("UPDATE userdata SET last_login_time=now()::timestamp, last_login_ip=($1) WHERE username=($2)", [reqData.last_login_ip, reqData.username])
         ]);
       })
       .then(data=> {
@@ -78,7 +74,7 @@ router.post('/api/register', (req, res, next) => {
     }
 
     // Grab data from http request
-    const data = {
+    const reqData = {
       username: req.body.username,
       password: req.body.password,
       first_name: req.body.first_name,
@@ -88,74 +84,43 @@ router.post('/api/register', (req, res, next) => {
       email: req.body.email
     };
 
-    var isDuplicated = false;
-    pool.connect(function(err, client, done) {
-      if(err) {
-        return console.error('error fetching client from pool', err);
-      }
-      client.query('SELECT username FROM userdata', function(err, result) {
-        //call `done(err)` to release the client back to the pool (or destroy it if there is an error) 
-        done(err);
-     
-        if(err) {
-          return console.error('error running query', err);
-        }
-
-        //return res.json(result.rows.length);
-        // username duplicate check
-        
+    db.any("SELECT username FROM userdata")
+      .then(data => {
+        //console.log(data[0].username);
         function checkExist() {
             var i = null;
-            for (i = 0; result.rows.length > i; i += 1) {
-                if (result.rows[i].username === data.username) {
+            for (i = 0; data.length > i; i += 1) {
+                if (data[i].username === reqData.username) {
                     return true;
                 }
             }
             return false;
         };
 
-        isDuplicated = checkExist();
-        if (isDuplicated) {
-          return res.redirect('/');
+        if (checkExist()) {
+          console.log("Duplicate username!");
         } else {
-          return res.redirect('/main.html');
-        } 
+          db.none("INSERT INTO userdata(username, password, first_name, last_name, last_login_time, last_login_ip, email) values($1, $2, $3, $4, $5, $6, $7)", [reqData.username, reqData.password, reqData.first_name, reqData.last_name, reqData.last_login_time, reqData.last_login_ip, reqData.email])
+            .then(data => {
+              console.log("Inserted new user!");
 
+            })
+            .catch(error => {
+                // error;
+                console.error(error);
+            });
+        }
+      })
+      .catch(error => {
+          // error;
+          console.error(error);
       });
-
-
-
-    });
-     
-    pool.on('error', function (err, client) {
-      console.error('idle client error', err.message, err.stack)
-    }) 
 });
 
 
 // Fetch data from psql
 router.get('/api/getusers', (req, res, next) => {
-    // to run a query we can acquire a client from the pool, 
-    // run a query on the client, and then return the client to the pool 
-    pool.connect(function(err, client, done) {
-      if(err) {
-        return console.error('error fetching client from pool', err);
-      }
-      client.query('SELECT * FROM userdata', function(err, result) {
-        //call `done(err)` to release the client back to the pool (or destroy it if there is an error) 
-        done(err);
-     
-        if(err) {
-          return console.error('error running query', err);
-        }
-        return res.json(result.rows);
-        //console.log(result.rows[0]);
-      });
-    });
-     
-    pool.on('error', function (err, client) {
-      console.error('idle client error', err.message, err.stack)
-    }) 
+
 });
 
 // Insert data
@@ -173,7 +138,7 @@ router.post('/api/adduser', (req, res, next) => {
     }
 
     // Grab data from http request
-    const data = {
+    const reqData = {
       username: req.body.username,
       password: req.body.password,
       first_name: req.body.first_name,
@@ -183,25 +148,15 @@ router.post('/api/adduser', (req, res, next) => {
       email: req.body.email
     };
 
-    pool.connect(function(err, client, done) {
-      if(err) {
-        return console.error('error fetching client from pool', err);
-      }
-      client.query('INSERT INTO userdata(username, password, first_name, last_name, last_login_time, last_login_ip, email) values($1, $2, $3, $4, $5, $6, $7)', [data.username, data.password, data.first_name, data.last_name, data.last_login_time, data.last_login_ip, data.email], function(err, result) {
-        //call `done(err)` to release the client back to the pool (or destroy it if there is an error) 
-        done(err);
-     
-        if(err) {
-          return console.error('error running query', err);
-        }
-        return res.json(result);
-        //console.log(result.rows[0]);
+    db.none("INSERT INTO userdata(username, password, first_name, last_name, last_login_time, last_login_ip, email) values($1, $2, $3, $4, $5, $6, $7)", [reqData.username, reqData.password, reqData.first_name, reqData.last_name, reqData.last_login_time, reqData.last_login_ip, reqData.email])
+      .then(data => {
+        console.log("Inserted new user!");
+
+      })
+      .catch(error => {
+          // error;
+          console.error(error);
       });
-    });
-     
-    pool.on('error', function (err, client) {
-      console.error('idle client error', err.message, err.stack)
-    }) 
 });
 
 
@@ -222,7 +177,7 @@ router.put('/api/updateuser/:user_id', (req, res, next) => {
     const id = req.params.user_id;
 
     // Grab data from http request
-    const data = {
+    const reqData = {
       username: req.body.username,
       password: req.body.password,
       first_name: req.body.first_name,
@@ -232,30 +187,16 @@ router.put('/api/updateuser/:user_id', (req, res, next) => {
       email: req.body.email
     };
 
-    pool.connect(function(err, client, done) {
-      if(err) {
-        return console.error('error fetching client from pool', err);
-      }
-      client.query('UPDATE userdata SET username=($1), password=($2), first_name=($3), last_name=($4), last_login_time=($5), last_login_ip=($6), email=($7) WHERE id=($8)', [data.username, data.password, data.first_name, data.last_name, data.last_login_time, data.last_login_ip, data.email, id], function(err, result) {
-        //call `done(err)` to release the client back to the pool (or destroy it if there is an error) 
-        done(err);
-     
-        if(err) {
-          return console.error('error running query', err);
-        }
-        return res.json(result);
+    db.none("UPDATE userdata SET username=($1), password=($2), first_name=($3), last_name=($4), last_login_time=($5), last_login_ip=($6), email=($7) WHERE id=($8)", [reqData.username, reqData.password, reqData.first_name, reqData.last_name, reqData.last_login_time, reqData.last_login_ip, reqData.email, id])
+      .then(data => {
+        console.log("Updated new user!");
+
+      })
+      .catch(error => {
+          // error;
+          console.error(error);
       });
-    });
-     
-    pool.on('error', function (err, client) {
-      // if an error is encountered by a client while it sits idle in the pool 
-      // the pool itself will emit an error event with both the error and 
-      // the client which emitted the original error 
-      // this is a rare occurrence but can happen if there is a network partition 
-      // between your application and the database, the database restarts, etc. 
-      // and so you might want to handle it and at least log it out 
-      console.error('idle client error', err.message, err.stack)
-    }) 
+
 });
 
 
