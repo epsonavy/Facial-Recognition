@@ -1,21 +1,28 @@
 const express = require('express');
 const router = express.Router();
 
-var pgp = require('pg-promise')();
+var pg = require('pg');
  
 // create a config to configure both pooling behavior 
 // and client options 
 // note: all config is optional and the environment variables 
 // will be read if the config is not present 
 var config = {
-  user: 'postgres', 
-  database: 'postgres',
-  password: 'student', 
-  host: 'localhost',  
-  port: 5432,  
+  user: 'postgres', //env var: PGUSER 
+  database: 'postgres', //env var: PGDATABASE 
+  password: 'student', //env var: PGPASSWORD 
+  host: 'localhost', // Server hosting the postgres database 
+  port: 5432, //env var: PGPORT 
+  max: 10, // max number of clients in the pool 
+  idleTimeoutMillis: 30000, // how long a client is allowed to remain idle before being closed
+  multipleStatementResult: true
 };
  
-var db = pgp(config);
+ 
+//this initializes a connection pool 
+//it will keep idle connections open for a 30 seconds 
+//and set a limit of maximum 10 idle clients 
+var pool = new pg.Pool(config);
 
 // Login
 router.post('/api/login', (req, res, next) => {
@@ -37,31 +44,73 @@ router.post('/api/login', (req, res, next) => {
       last_login_time: Date.now(),
       last_login_ip: getIP()
     };
-    var saveData;
 
-    db.tx(t=> {
-        return t.batch([
-            t.one("SELECT username, password, first_name, last_name, last_login_time, last_login_ip FROM userdata WHERE username=$1 and password=$2", [data.username, data.password]),
-            t.none("UPDATE userdata SET last_login_time=now()::timestamp, last_login_ip=($1) WHERE username=($2)", [data.last_login_ip, data.username])
-        ]);
-      })
-      .then(data=> {
-          if (data[0]) {
-            return res.render('main', {
-              "username": data[0].username, 
-              "first_name": data[0].first_name, 
-              "last_name": data[0].last_name, 
-              "last_login_time": data[0].last_login_time, 
-              "last_login_ip": data[0].last_login_ip
+    pool.connect(function(err, client, done) {
+      var saveData;
+      if(err) {
+        return console.error('error fetching client from pool', err);
+      }
+      var promise = client.query('SELECT username, password, first_name, last_name, last_login_time, last_login_ip FROM userdata WHERE username=$1 and password=$2', [data.username, data.password], function(err, result) {
+        //call `done(err)` to release the client back to the pool (or destroy it if there is an error) 
+        done(err);
+     
+        if(err) {
+          return console.error('error running query', err);
+        }
+        
+        // if found user data
+        if (result.rows[0]) {         
+          saveData = {
+            username: result.rows[0].username, 
+            first_name: result.rows[0].first_name, 
+            last_name: result.rows[0].last_name, 
+            last_login_time: result.rows[0].last_login_time, 
+            last_login_ip: result.rows[0].last_login_ip
+          };
+          return saveData;
+          // Another callback to update last login and IP address
+          /*
+          var pool2 = new pg.Pool(config);
+          pool2.connect(function(err, client, done) {
+            if(err) {
+              return console.error('error fetching client from pool', err);
+            }
+            client.query('UPDATE userdata SET last_login_time=($1), last_login_ip=($2), WHERE username=($3)', [data.last_login_time, data.last_login_ip, data.username], function(err, result) {
+                //call `done(err)` to release the client back to the pool (or destroy it if there is an error) 
+                done(err);
+             
+              if(err) {
+                return console.error('error running query', err);
+              }
+              //return res.json(result);
+              console.log(result.rows[0]);
             });
-          } else {
-            return res.redirect('/wrongpassword.html');
-          } 
-      })
-      .catch(error=> {
-          // error
-          console.error(error);
+          });
+           
+          pool2.on('error', function (err, client) {
+            console.error('idle client error', err.message, err.stack)
+          }) */
+        }
+
+        if (saveData) {
+          return res.render('main', {
+            "username": saveData.username, 
+            "first_name": saveData.first_name, 
+            "last_name": saveData.last_name, 
+            "last_login_time": saveData.last_login_time, 
+            "last_login_ip": saveData.last_login_ip
+          });
+        } else {
+          return res.redirect('/wrongpassword.html');
+        }
+
       });
+
+    });
+     
+    pool.on('error', function (err, client) {
+      console.error('idle client error', err.message, err.stack)
+    }) 
 });
 
 // Register
