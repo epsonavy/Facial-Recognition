@@ -103,6 +103,13 @@ router.post('/api/register', (req, res, next) => {
           db.none("INSERT INTO userdata(username, password, first_name, last_name, last_login_time, last_login_ip, email) values($1, $2, $3, $4, $5, $6, $7)", [reqData.username, reqData.password, reqData.first_name, reqData.last_name, reqData.last_login_time, reqData.last_login_ip, reqData.email])
             .then(data => {
               console.log("Inserted new user!");
+              return res.render('main', {
+                "username": reqData.username, 
+                "first_name": reqData.first_name, 
+                "last_name": reqData.last_name, 
+                "last_login_time": reqData.last_login_time, 
+                "last_login_ip": reqData.last_login_ip
+              });
 
             })
             .catch(error => {
@@ -151,7 +158,6 @@ router.post('/api/adduser', (req, res, next) => {
     db.none("INSERT INTO userdata(username, password, first_name, last_name, last_login_time, last_login_ip, email) values($1, $2, $3, $4, $5, $6, $7)", [reqData.username, reqData.password, reqData.first_name, reqData.last_name, reqData.last_login_time, reqData.last_login_ip, reqData.email])
       .then(data => {
         console.log("Inserted new user!");
-
       })
       .catch(error => {
           // error;

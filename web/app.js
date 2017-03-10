@@ -12,11 +12,18 @@ var video        = require('./lib/video');
 // BinaryServer on port 9000
 var bs = new BinaryServer({ port: 9000 });
 
+var config = require('./config.js');
+
+var session = require('express-session');
+
 var index = require('./routes/index');
 var auth = require('./routes/auth');
 var users = require('./routes/users');
 
 var app = express();
+app.set('api_secret', config.secret);
+app.set('token_expire', config.token_expire);
+app.use(session({secret: config.secret}));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
