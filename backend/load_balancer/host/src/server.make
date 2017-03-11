@@ -1,1 +1,1 @@
-gcc FacialLoadBalancerServer.c -lpthread -o FacialLoadBalancerServer
+gcc FacialLoadBalancerServer.c -lpthread -o ../bin/FacialLoadBalancerServer
