@@ -99,6 +99,7 @@ router.post('/api/register', (req, res, next) => {
 
         if (checkExist()) {
           console.log("Duplicate username!");
+          return res.redirect('/main.html');
         } else {
           db.none("INSERT INTO userdata(username, password, first_name, last_name, last_login_time, last_login_ip, email) values($1, $2, $3, $4, $5, $6, $7)", [reqData.username, reqData.password, reqData.first_name, reqData.last_name, reqData.last_login_time, reqData.last_login_ip, reqData.email])
             .then(data => {
@@ -125,9 +126,18 @@ router.post('/api/register', (req, res, next) => {
 });
 
 
-// Fetch data from psql
+// Fetch data from psql ******TEST ONLY*******
 router.get('/api/getusers', (req, res, next) => {
 
+
+  db.any("SELECT * FROM userdata")
+    .then(data => {
+      return res.json(data);
+    })
+    .catch(error => {
+        // error;
+        console.error(error);
+    });
 });
 
 // Insert data
