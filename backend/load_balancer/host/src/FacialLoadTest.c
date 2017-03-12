@@ -17,6 +17,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <poll.h>
+#include <string.h>
 
 #include "FacialLoadEncryption.h"
 #include "FacialLoadPackets.h"
@@ -85,6 +86,8 @@ void* accept_thread(void* args){
 				}else{
 					printf("Peer was not accepted because of maximum server reached.\n");
 				}
+				char* write_address = "If_You_See_This_YoureGood\0";
+				send(add_socket.fd, write_address, strlen(write_address), 0);
 			}
 
 		}
