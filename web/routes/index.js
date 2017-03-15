@@ -13,6 +13,29 @@ var config = {
  
 var db = pgp(config);
 
+// Dashboard
+router.get('/dashboard', (req, res, next) => {
+  if(req.session && req.session.user) {
+    db.one("SELECT username, password, first_name, last_name, last_login_time, last_login_ip FROM userdata WHERE username=$1 and password=$2", [req.session.user.username, req.session.user.password])
+      .then(data => {
+        res.render('main', {
+              "username": data.username, 
+              "first_name": data.first_name, 
+              "last_name": data.last_name, 
+              "last_login_time": data.last_login_time, 
+              "last_login_ip": data.last_login_ip
+            });
+      })
+      .catch(error => {
+          console.error(error);
+          res.redirect('/index.html');
+      });
+
+  } else {
+    res.redirect('/index.html');
+  }
+});
+
 // Login
 router.post('/api/login', (req, res, next) => {
     // Get IP
@@ -42,21 +65,18 @@ router.post('/api/login', (req, res, next) => {
         ]);
       })
       .then(data=> {
-          if (data[0]) {
-            return res.render('main', {
-              "username": data[0].username, 
-              "first_name": data[0].first_name, 
-              "last_name": data[0].last_name, 
-              "last_login_time": data[0].last_login_time, 
-              "last_login_ip": data[0].last_login_ip
-            });
+          if (data) {
+            // Store session data 
+            req.session.user = data[0];
+            res.redirect('/dashboard');
           } else {
-            return res.redirect('/wrongpassword.html');
+            res.redirect('/wrongpassword.html');
           } 
       })
       .catch(error=> {
           // error
-          console.error(error);
+          //console.error(error);
+          res.redirect('/wrongpassword.html');
       });
 });
 
@@ -99,12 +119,12 @@ router.post('/api/register', (req, res, next) => {
 
         if (checkExist()) {
           console.log("Duplicate username!");
-          return res.redirect('/main.html');
+          res.redirect('/duplicated.html');
         } else {
           db.none("INSERT INTO userdata(username, password, first_name, last_name, last_login_time, last_login_ip, email) values($1, $2, $3, $4, $5, $6, $7)", [reqData.username, reqData.password, reqData.first_name, reqData.last_name, reqData.last_login_time, reqData.last_login_ip, reqData.email])
             .then(data => {
               console.log("Inserted new user!");
-              return res.render('main', {
+              res.render('main', {
                 "username": reqData.username, 
                 "first_name": reqData.first_name, 
                 "last_name": reqData.last_name, 
@@ -132,7 +152,7 @@ router.get('/api/getusers', (req, res, next) => {
 
   db.any("SELECT * FROM userdata")
     .then(data => {
-      return res.json(data);
+      res.json(data);
     })
     .catch(error => {
         // error;
