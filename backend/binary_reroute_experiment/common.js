@@ -18,7 +18,7 @@ function emit(event, data, file) {
     data.event = event;
 
 	var socket = new io.Socket();
-	socket.connect('LOAD_BALANCING_IP_ADDRESS:27015');
+	socket.connect('127.0.0.1:27015');
 
 	var onConnectPromise = new Promise(function(resolve, reject){
 		socket.on('connect', function(){

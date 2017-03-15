@@ -111,7 +111,7 @@ void* accept_thread(void* args){
 				}
 			}
 		}
-
+	usleep(500);
 	}
 	return NULL;
 }
