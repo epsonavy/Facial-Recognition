@@ -13,6 +13,12 @@ var config = {
  
 var db = pgp(config);
 
+// Logout
+router.post('/logout', (req, res, next) => {
+	req.session.destroy();
+    res.redirect('/');
+});
+
 // Dashboard
 router.get('/dashboard', (req, res, next) => {
   if(req.session && req.session.user) {
