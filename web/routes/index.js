@@ -1,17 +1,6 @@
 const express = require('express');
 const router = express.Router();
-
-var pgp = require('pg-promise')();
- 
-var config = {
-  user: 'postgres', 
-  database: 'postgres',
-  password: 'student', 
-  host: 'localhost',  
-  port: 5432,  
-};
- 
-var db = pgp(config);
+var db = require('./db.js');
 
 // Logout
 router.post('/logout', (req, res, next) => {
