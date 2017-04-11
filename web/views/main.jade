@@ -11,7 +11,7 @@ html
     script(src='/js/lib/binary.js')
     script(src='/js/lib/common.js')
     script(src='/js/lib/video.js')
-    script(src='/js/main.js')
+    script(src='/js/update.js')
 
   body
   .form
@@ -43,7 +43,11 @@ html
             article(id='progress') Drop Video from PC here
         fieldset
           legend Current Videos in Server
-          nav(id='list')
+          nav(id='list') 
+            ul
+              each file in files
+                li
+                  a(href=file)=file            
         fieldset
           legend Video Player
           video(id='my-player', class='video-js', controls='true', data-setup='{}')

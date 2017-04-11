@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 var db = require('./db.js');
 
+
+
 // Logout
 router.post('/logout', (req, res, next) => {
 	req.session.destroy();
@@ -11,6 +13,14 @@ router.post('/logout', (req, res, next) => {
 // Dashboard
 router.get('/dashboard', (req, res, next) => {
   if(req.session && req.session.user) {
+  	function getFiles() {
+    	const videosFolder = './public/videos';
+    	const fs = require('fs');
+    	var ary = fs.readdirSync(videosFolder);
+        console.log("videos folder has " + ary.length + " files\n");
+        return ary;
+	}
+	var myFiles = getFiles();
     db.one("SELECT username, password, first_name, last_name, last_login_time, last_login_ip FROM userdata WHERE username=$1 and password=$2", [req.session.user.username, req.session.user.password])
       .then(data => {
         res.render('main', {
@@ -18,7 +28,8 @@ router.get('/dashboard', (req, res, next) => {
               "first_name": data.first_name, 
               "last_name": data.last_name, 
               "last_login_time": data.last_login_time, 
-              "last_login_ip": data.last_login_ip
+              "last_login_ip": data.last_login_ip,
+        	  files : myFiles
             });
       })
       .catch(error => {
@@ -33,6 +44,8 @@ router.get('/dashboard', (req, res, next) => {
 
 // Login
 router.post('/api/login', (req, res, next) => {
+
+
     // Get IP
     function getIP() {
       var str = req.headers['x-forwarded-for'] || 
