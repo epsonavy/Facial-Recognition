@@ -37,7 +37,6 @@ html
           aside(id='select-box')
             form(action='/upload', enctype='multipart/form-data', method='post')
               input(id='targetFile', name='upload', type='file', multiple='multiple', accept='video/*;capture=camcorder')
-              input(type='hidden', name='username', value='#{username}')
               p(id='uploadMsg') Size Limit: 20MB
               button(id='uploadButton', type='submit', class='button button-block') Upload
         fieldset
