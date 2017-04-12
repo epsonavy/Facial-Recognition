@@ -126,96 +126,94 @@ function fixEvent(event) {
   // other expected methods like isPropagationStopped. Seems to be a problem
   // with the Javascript Ninja code. So we're just overriding all events now.
   if (!event || !event.isPropagationStopped) {
-    (function () {
-      var old = event || _window2['default'].event;
+    var old = event || _window2['default'].event;
 
-      event = {};
-      // Clone the old object so that we can modify the values event = {};
-      // IE8 Doesn't like when you mess with native event properties
-      // Firefox returns false for event.hasOwnProperty('type') and other props
-      //  which makes copying more difficult.
-      // TODO: Probably best to create a whitelist of event props
-      for (var key in old) {
-        // Safari 6.0.3 warns you if you try to copy deprecated layerX/Y
-        // Chrome warns you if you try to copy deprecated keyboardEvent.keyLocation
-        // and webkitMovementX/Y
-        if (key !== 'layerX' && key !== 'layerY' && key !== 'keyLocation' && key !== 'webkitMovementX' && key !== 'webkitMovementY') {
-          // Chrome 32+ warns if you try to copy deprecated returnValue, but
-          // we still want to if preventDefault isn't supported (IE8).
-          if (!(key === 'returnValue' && old.preventDefault)) {
-            event[key] = old[key];
-          }
+    event = {};
+    // Clone the old object so that we can modify the values event = {};
+    // IE8 Doesn't like when you mess with native event properties
+    // Firefox returns false for event.hasOwnProperty('type') and other props
+    //  which makes copying more difficult.
+    // TODO: Probably best to create a whitelist of event props
+    for (var key in old) {
+      // Safari 6.0.3 warns you if you try to copy deprecated layerX/Y
+      // Chrome warns you if you try to copy deprecated keyboardEvent.keyLocation
+      // and webkitMovementX/Y
+      if (key !== 'layerX' && key !== 'layerY' && key !== 'keyLocation' && key !== 'webkitMovementX' && key !== 'webkitMovementY') {
+        // Chrome 32+ warns if you try to copy deprecated returnValue, but
+        // we still want to if preventDefault isn't supported (IE8).
+        if (!(key === 'returnValue' && old.preventDefault)) {
+          event[key] = old[key];
         }
       }
+    }
 
-      // The event occurred on this element
-      if (!event.target) {
-        event.target = event.srcElement || _document2['default'];
+    // The event occurred on this element
+    if (!event.target) {
+      event.target = event.srcElement || _document2['default'];
+    }
+
+    // Handle which other element the event is related to
+    if (!event.relatedTarget) {
+      event.relatedTarget = event.fromElement === event.target ? event.toElement : event.fromElement;
+    }
+
+    // Stop the default browser action
+    event.preventDefault = function () {
+      if (old.preventDefault) {
+        old.preventDefault();
       }
+      event.returnValue = false;
+      old.returnValue = false;
+      event.defaultPrevented = true;
+    };
 
-      // Handle which other element the event is related to
-      if (!event.relatedTarget) {
-        event.relatedTarget = event.fromElement === event.target ? event.toElement : event.fromElement;
+    event.defaultPrevented = false;
+
+    // Stop the event from bubbling
+    event.stopPropagation = function () {
+      if (old.stopPropagation) {
+        old.stopPropagation();
       }
+      event.cancelBubble = true;
+      old.cancelBubble = true;
+      event.isPropagationStopped = returnTrue;
+    };
 
-      // Stop the default browser action
-      event.preventDefault = function () {
-        if (old.preventDefault) {
-          old.preventDefault();
-        }
-        event.returnValue = false;
-        old.returnValue = false;
-        event.defaultPrevented = true;
-      };
+    event.isPropagationStopped = returnFalse;
 
-      event.defaultPrevented = false;
-
-      // Stop the event from bubbling
-      event.stopPropagation = function () {
-        if (old.stopPropagation) {
-          old.stopPropagation();
-        }
-        event.cancelBubble = true;
-        old.cancelBubble = true;
-        event.isPropagationStopped = returnTrue;
-      };
-
-      event.isPropagationStopped = returnFalse;
-
-      // Stop the event from bubbling and executing other handlers
-      event.stopImmediatePropagation = function () {
-        if (old.stopImmediatePropagation) {
-          old.stopImmediatePropagation();
-        }
-        event.isImmediatePropagationStopped = returnTrue;
-        event.stopPropagation();
-      };
-
-      event.isImmediatePropagationStopped = returnFalse;
-
-      // Handle mouse position
-      if (event.clientX !== null && event.clientX !== undefined) {
-        var doc = _document2['default'].documentElement;
-        var body = _document2['default'].body;
-
-        event.pageX = event.clientX + (doc && doc.scrollLeft || body && body.scrollLeft || 0) - (doc && doc.clientLeft || body && body.clientLeft || 0);
-        event.pageY = event.clientY + (doc && doc.scrollTop || body && body.scrollTop || 0) - (doc && doc.clientTop || body && body.clientTop || 0);
+    // Stop the event from bubbling and executing other handlers
+    event.stopImmediatePropagation = function () {
+      if (old.stopImmediatePropagation) {
+        old.stopImmediatePropagation();
       }
+      event.isImmediatePropagationStopped = returnTrue;
+      event.stopPropagation();
+    };
 
-      // Handle key presses
-      event.which = event.charCode || event.keyCode;
+    event.isImmediatePropagationStopped = returnFalse;
 
-      // Fix button for mouse clicks:
-      // 0 == left; 1 == middle; 2 == right
-      if (event.button !== null && event.button !== undefined) {
+    // Handle mouse position
+    if (event.clientX !== null && event.clientX !== undefined) {
+      var doc = _document2['default'].documentElement;
+      var body = _document2['default'].body;
 
-        // The following is disabled because it does not pass videojs-standard
-        // and... yikes.
-        /* eslint-disable */
-        event.button = event.button & 1 ? 0 : event.button & 4 ? 1 : event.button & 2 ? 2 : 0;
-        /* eslint-enable */
-      }
-    })();
+      event.pageX = event.clientX + (doc && doc.scrollLeft || body && body.scrollLeft || 0) - (doc && doc.clientLeft || body && body.clientLeft || 0);
+      event.pageY = event.clientY + (doc && doc.scrollTop || body && body.scrollTop || 0) - (doc && doc.clientTop || body && body.clientTop || 0);
+    }
+
+    // Handle key presses
+    event.which = event.charCode || event.keyCode;
+
+    // Fix button for mouse clicks:
+    // 0 == left; 1 == middle; 2 == right
+    if (event.button !== null && event.button !== undefined) {
+
+      // The following is disabled because it does not pass videojs-standard
+      // and... yikes.
+      /* eslint-disable */
+      event.button = event.button & 1 ? 0 : event.button & 4 ? 1 : event.button & 2 ? 2 : 0;
+      /* eslint-enable */
+    }
   }
 
   // Returns fixed-up instance

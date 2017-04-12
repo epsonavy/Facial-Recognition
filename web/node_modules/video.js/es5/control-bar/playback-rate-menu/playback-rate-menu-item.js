@@ -47,6 +47,7 @@ var PlaybackRateMenuItem = function (_MenuItem) {
     // Modify options for parent MenuItem class's init.
     options.label = label;
     options.selected = rate === 1;
+    options.selectable = true;
 
     var _this = _possibleConstructorReturn(this, _MenuItem.call(this, player, options));
 

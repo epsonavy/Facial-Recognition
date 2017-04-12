@@ -220,7 +220,7 @@ var ModalDialog = function (_Component) {
       // playing state.
       this.wasPlaying_ = !player.paused();
 
-      if (this.wasPlaying_) {
+      if (this.options_.pauseOnOpen && this.wasPlaying_) {
         player.pause();
       }
 
@@ -287,7 +287,7 @@ var ModalDialog = function (_Component) {
       this.trigger('beforemodalclose');
       this.opened_ = false;
 
-      if (this.wasPlaying_) {
+      if (this.wasPlaying_ && this.options_.pauseOnOpen) {
         player.play();
       }
 
@@ -485,6 +485,7 @@ var ModalDialog = function (_Component) {
 
 
 ModalDialog.prototype.options_ = {
+  pauseOnOpen: true,
   temporary: true
 };
 

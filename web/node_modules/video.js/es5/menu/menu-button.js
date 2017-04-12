@@ -97,9 +97,9 @@ var MenuButton = function (_ClickableComponent) {
     this.buttonPressed_ = false;
     this.el_.setAttribute('aria-expanded', 'false');
 
-    if (this.items && this.items.length === 0) {
+    if (this.items && this.items.length <= this.hideThreshold_) {
       this.hide();
-    } else if (this.items && this.items.length > 1) {
+    } else {
       this.show();
     }
   };
@@ -115,6 +115,16 @@ var MenuButton = function (_ClickableComponent) {
   MenuButton.prototype.createMenu = function createMenu() {
     var menu = new _menu2['default'](this.player_);
 
+    /**
+     * Hide the menu if the number of items is less than or equal to this threshold. This defaults
+     * to 0 and whenever we add items which can be hidden to the menu we'll increment it. We list
+     * it here because every time we run `createMenu` we need to reset the value.
+     *
+     * @protected
+     * @type {Number}
+     */
+    this.hideThreshold_ = 0;
+
     // Add a title list item to the top
     if (this.options_.title) {
       var title = Dom.createEl('li', {
@@ -122,6 +132,8 @@ var MenuButton = function (_ClickableComponent) {
         innerHTML: (0, _toTitleCase2['default'])(this.options_.title),
         tabIndex: -1
       });
+
+      this.hideThreshold_ += 1;
 
       menu.children_.unshift(title);
       Dom.insertElFirst(title, menu.contentEl());

@@ -1,11 +1,13 @@
 vtt.js
 ======
 
-[![Build Status](https://travis-ci.org/mozilla/vtt.js.svg?branch=master)](https://travis-ci.org/mozilla/vtt.js) [![npm-version](http://img.shields.io/npm/v/vtt.js.svg)](https://www.npmjs.org/package/vtt.js) [![Dependency Status](https://david-dm.org/mozilla/vtt.js.svg?theme=shields.io)](https://david-dm.org/mozilla/vtt.js) [![devDependency Status](https://david-dm.org/mozilla/vtt.js/dev-status.svg?theme=shields.io)](https://david-dm.org/mozilla/vtt.js#info=devDependencies)
+[comment]: # ([![Build Status](https://travis-ci.org/mozilla/vtt.js.svg?branch=master)](https://travis-ci.org/mozilla/vtt.js) [![npm-version](http://img.shields.io/npm/v/vtt.js.svg)](https://www.npmjs.org/package/vtt.js) [![Dependency Status](https://david-dm.org/mozilla/vtt.js.svg?theme=shields.io)](https://david-dm.org/mozilla/vtt.js) [![devDependency Status](https://david-dm.org/mozilla/vtt.js/dev-status.svg?theme=shields.io)](https://david-dm.org/mozilla/vtt.js#info=devDependencies))
 
 Implementation of the [WebVTT](https://developer.mozilla.org/en-US/docs/HTML/WebVTT) spec in JavaScript. Can be used
 in NodeJS, on the browser, and many other places. Mozilla uses this implementation for parsing and processing WebVTT
 files in Firefox/Gecko.
+
+This is a fork of vttjs with some changes that are used by Video.js.
 
 ##Table of Contents##
 
@@ -18,6 +20,7 @@ files in Firefox/Gecko.
     - [oncue(cue)](#oncuecue)
     - [onflush()](#onflush)
     - [onparsingerror(error)](#onparsingerrorerror)
+    - [ontimestampmap(timestampmap)](#ontimestampmaptimestampmap)
   - [WebVTT.convertCueToDOMTree(window, cuetext)](#webvttconvertcuetodomtreewindow-cuetext)
   - [WebVTT.processCues(window, cues, overlay)](#webvttprocesscueswindow-cues-overlay)
   - [ParsingError](#parsingerror)
@@ -154,6 +157,17 @@ information.
 ```js
 parser.onparsingerror = function(e) {
   console.log(e);
+};
+```
+
+####ontimestampmap(timestampmap)####
+
+Is invoked when an `X-TIMESTAMP-MAP` metadata header ([defined here](https://tools.ietf.org/html/draft-pantos-http-live-streaming-20#section-3.5)) is parsed. This header maps WebVTT cue timestamps to MPEG-2 (PES) timestamps in other Renditions of the Variant Stream.
+
+```js
+parser.ontimestampmap = function(timestamp) {
+  console.log('LOCAL:', timestamp.LOCAL);
+  console.log('MPEGTS:', timestamp.MPEGTS);
 };
 ```
 
@@ -536,18 +550,18 @@ for the task. If you want to know more about `cue2json` you can run it directly
 like so:
 
 ```bash
-$ ./bin/cue2json.js 
+$ ./bin/cue2json.js
 $ Generate JSON test files from a reference VTT file.
 $ Usage: node ./bin/cue2json.js [options]
-$ 
+$
 $ Options:
-$   -v, --vtt      Path to VTT file.                                                                                     
+$   -v, --vtt      Path to VTT file.
 $   -d, --dir      Path to test directory. Will recursively find all JSON files with matching VTT files and rewrite them.
-$   -c, --copy     Copies the VTT file to a JSON file with the same name.                                                
-$   -p, --process  Generate a JSON file of the output returned from the processing model. 
+$   -c, --copy     Copies the VTT file to a JSON file with the same name.
+$   -p, --process  Generate a JSON file of the output returned from the processing model.
 ```
 
-**Notes:** 
+**Notes:**
 
 * `cue2json` utilizes the last development build done. This is why the Grunt `run` task is
 good as you don't have to remember to build it yourself. If you don't build it yourself then you could

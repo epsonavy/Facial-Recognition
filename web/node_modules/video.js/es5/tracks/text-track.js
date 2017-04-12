@@ -129,17 +129,15 @@ var loadTrack = function loadTrack(src, track) {
     // NOTE: this is only used for the alt/video.novtt.js build
     if (typeof _window2['default'].WebVTT !== 'function') {
       if (track.tech_) {
-        (function () {
-          var loadHandler = function loadHandler() {
-            return parseCues(responseBody, track);
-          };
+        var loadHandler = function loadHandler() {
+          return parseCues(responseBody, track);
+        };
 
-          track.tech_.on('vttjsloaded', loadHandler);
-          track.tech_.on('vttjserror', function () {
-            _log2['default'].error('vttjs failed to load, stopping trying to process ' + track.src);
-            track.tech_.off('vttjsloaded', loadHandler);
-          });
-        })();
+        track.tech_.on('vttjsloaded', loadHandler);
+        track.tech_.on('vttjserror', function () {
+          _log2['default'].error('vttjs failed to load, stopping trying to process ' + track.src);
+          track.tech_.off('vttjsloaded', loadHandler);
+        });
       }
     } else {
       parseCues(responseBody, track);
@@ -192,7 +190,7 @@ var TextTrack = function (_Track) {
    *        If this track should default to on or off.
    */
   function TextTrack() {
-    var _this, _ret2;
+    var _this, _ret;
 
     var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
@@ -247,7 +245,9 @@ var TextTrack = function (_Track) {
     });
 
     if (mode !== 'disabled') {
-      tt.tech_.on('timeupdate', timeupdateHandler);
+      tt.tech_.ready(function () {
+        tt.tech_.on('timeupdate', timeupdateHandler);
+      }, true);
     }
 
     /**
@@ -276,12 +276,16 @@ var TextTrack = function (_Track) {
         return mode;
       },
       set: function set(newMode) {
+        var _this2 = this;
+
         if (!_trackEnums.TextTrackMode[newMode]) {
           return;
         }
         mode = newMode;
         if (mode === 'showing') {
-          this.tech_.on('timeupdate', timeupdateHandler);
+          this.tech_.ready(function () {
+            _this2.tech_.on('timeupdate', timeupdateHandler);
+          }, true);
         }
         /**
          * An event that fires when mode changes on this track. This allows
@@ -366,7 +370,7 @@ var TextTrack = function (_Track) {
       tt.loaded_ = true;
     }
 
-    return _ret2 = tt, _possibleConstructorReturn(_this, _ret2);
+    return _ret = tt, _possibleConstructorReturn(_this, _ret);
   }
 
   /**
@@ -377,7 +381,23 @@ var TextTrack = function (_Track) {
    */
 
 
-  TextTrack.prototype.addCue = function addCue(cue) {
+  TextTrack.prototype.addCue = function addCue(originalCue) {
+    var cue = originalCue;
+
+    if (_window2['default'].vttjs && !(originalCue instanceof _window2['default'].vttjs.VTTCue)) {
+      cue = new _window2['default'].vttjs.VTTCue(originalCue.startTime, originalCue.endTime, originalCue.text);
+
+      for (var prop in originalCue) {
+        if (!(prop in cue)) {
+          cue[prop] = originalCue[prop];
+        }
+      }
+
+      // make sure that `id` is copied over
+      cue.id = originalCue.id;
+      cue.originalCue_ = originalCue;
+    }
+
     var tracks = this.tech_.textTracks();
 
     if (tracks) {
@@ -401,19 +421,16 @@ var TextTrack = function (_Track) {
 
 
   TextTrack.prototype.removeCue = function removeCue(_removeCue) {
-    var removed = false;
+    var i = this.cues_.length;
 
-    for (var i = 0, l = this.cues_.length; i < l; i++) {
+    while (i--) {
       var cue = this.cues_[i];
 
-      if (cue === _removeCue) {
+      if (cue === _removeCue || cue.originalCue_ && cue.originalCue_ === _removeCue) {
         this.cues_.splice(i, 1);
-        removed = true;
+        this.cues.setCues_(this.cues_);
+        break;
       }
-    }
-
-    if (removed) {
-      this.cues.setCues_(this.cues_);
     }
   };
 

@@ -2,8 +2,6 @@
 
 exports.__esModule = true;
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
 var _templateObject = _taggedTemplateLiteralLoose(['Text Tracks are being loaded from another origin but the crossorigin attribute isn\'t used.\n            This may prevent text tracks from loading.'], ['Text Tracks are being loaded from another origin but the crossorigin attribute isn\'t used.\n            This may prevent text tracks from loading.']);
 
 var _tech = require('./tech.js');
@@ -315,8 +313,6 @@ var Html5 = function (_Tech) {
 
 
   Html5.prototype.handleLateInit_ = function handleLateInit_(el) {
-    var _this3 = this;
-
     if (el.networkState === 0 || el.networkState === 3) {
       // The video element hasn't started loading the source yet
       // or didn't find a source
@@ -324,50 +320,44 @@ var Html5 = function (_Tech) {
     }
 
     if (el.readyState === 0) {
-      var _ret = function () {
-        // NetworkState is set synchronously BUT loadstart is fired at the
-        // end of the current stack, usually before setInterval(fn, 0).
-        // So at this point we know loadstart may have already fired or is
-        // about to fire, and either way the player hasn't seen it yet.
-        // We don't want to fire loadstart prematurely here and cause a
-        // double loadstart so we'll wait and see if it happens between now
-        // and the next loop, and fire it if not.
-        // HOWEVER, we also want to make sure it fires before loadedmetadata
-        // which could also happen between now and the next loop, so we'll
-        // watch for that also.
-        var loadstartFired = false;
-        var setLoadstartFired = function setLoadstartFired() {
-          loadstartFired = true;
-        };
+      // NetworkState is set synchronously BUT loadstart is fired at the
+      // end of the current stack, usually before setInterval(fn, 0).
+      // So at this point we know loadstart may have already fired or is
+      // about to fire, and either way the player hasn't seen it yet.
+      // We don't want to fire loadstart prematurely here and cause a
+      // double loadstart so we'll wait and see if it happens between now
+      // and the next loop, and fire it if not.
+      // HOWEVER, we also want to make sure it fires before loadedmetadata
+      // which could also happen between now and the next loop, so we'll
+      // watch for that also.
+      var loadstartFired = false;
+      var setLoadstartFired = function setLoadstartFired() {
+        loadstartFired = true;
+      };
 
-        _this3.on('loadstart', setLoadstartFired);
+      this.on('loadstart', setLoadstartFired);
 
-        var triggerLoadstart = function triggerLoadstart() {
-          // We did miss the original loadstart. Make sure the player
-          // sees loadstart before loadedmetadata
-          if (!loadstartFired) {
-            this.trigger('loadstart');
-          }
-        };
+      var triggerLoadstart = function triggerLoadstart() {
+        // We did miss the original loadstart. Make sure the player
+        // sees loadstart before loadedmetadata
+        if (!loadstartFired) {
+          this.trigger('loadstart');
+        }
+      };
 
-        _this3.on('loadedmetadata', triggerLoadstart);
+      this.on('loadedmetadata', triggerLoadstart);
 
-        _this3.ready(function () {
-          this.off('loadstart', setLoadstartFired);
-          this.off('loadedmetadata', triggerLoadstart);
+      this.ready(function () {
+        this.off('loadstart', setLoadstartFired);
+        this.off('loadedmetadata', triggerLoadstart);
 
-          if (!loadstartFired) {
-            // We did miss the original native loadstart. Fire it now.
-            this.trigger('loadstart');
-          }
-        });
+        if (!loadstartFired) {
+          // We did miss the original native loadstart. Fire it now.
+          this.trigger('loadstart');
+        }
+      });
 
-        return {
-          v: void 0
-        };
-      }();
-
-      if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+      return;
     }
 
     // From here on we know that loadstart already fired and we missed it.
@@ -580,7 +570,7 @@ var Html5 = function (_Tech) {
 
 
   Html5.prototype.duration = function duration() {
-    var _this4 = this;
+    var _this3 = this;
 
     // Android Chrome will report duration as Infinity for VOD HLS until after
     // playback has started, which triggers the live display erroneously.
@@ -588,26 +578,20 @@ var Html5 = function (_Tech) {
     // the duration can be reliably known.
     if (this.el_.duration === Infinity && browser.IS_ANDROID && browser.IS_CHROME) {
       if (this.el_.currentTime === 0) {
-        var _ret2 = function () {
-          // Wait for the first `timeupdate` with currentTime > 0 - there may be
-          // several with 0
-          var checkProgress = function checkProgress() {
-            if (_this4.el_.currentTime > 0) {
-              // Trigger durationchange for genuinely live video
-              if (_this4.el_.duration === Infinity) {
-                _this4.trigger('durationchange');
-              }
-              _this4.off('timeupdate', checkProgress);
+        // Wait for the first `timeupdate` with currentTime > 0 - there may be
+        // several with 0
+        var checkProgress = function checkProgress() {
+          if (_this3.el_.currentTime > 0) {
+            // Trigger durationchange for genuinely live video
+            if (_this3.el_.duration === Infinity) {
+              _this3.trigger('durationchange');
             }
-          };
+            _this3.off('timeupdate', checkProgress);
+          }
+        };
 
-          _this4.on('timeupdate', checkProgress);
-          return {
-            v: NaN
-          };
-        }();
-
-        if ((typeof _ret2 === 'undefined' ? 'undefined' : _typeof(_ret2)) === "object") return _ret2.v;
+        this.on('timeupdate', checkProgress);
+        return NaN;
       }
     }
     return this.el_.duration || NaN;
@@ -650,7 +634,7 @@ var Html5 = function (_Tech) {
 
 
   Html5.prototype.proxyWebkitFullscreen_ = function proxyWebkitFullscreen_() {
-    var _this5 = this;
+    var _this4 = this;
 
     if (!('webkitDisplayingFullscreen' in this.el_)) {
       return;
@@ -668,8 +652,8 @@ var Html5 = function (_Tech) {
 
     this.on('webkitbeginfullscreen', beginFn);
     this.on('dispose', function () {
-      _this5.off('webkitbeginfullscreen', beginFn);
-      _this5.off('webkitendfullscreen', endFn);
+      _this4.off('webkitbeginfullscreen', beginFn);
+      _this4.off('webkitendfullscreen', endFn);
     });
   };
 

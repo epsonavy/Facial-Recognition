@@ -69,14 +69,13 @@ var TextTrackMenuItem = function (_MenuItem) {
     _this.track = track;
 
     if (tracks) {
-      (function () {
-        var changeHandler = Fn.bind(_this, _this.handleTracksChange);
+      var changeHandler = Fn.bind(_this, _this.handleTracksChange);
 
-        tracks.addEventListener('change', changeHandler);
-        _this.on('dispose', function () {
-          tracks.removeEventListener('change', changeHandler);
-        });
-      })();
+      player.on(['loadstart', 'texttrackchange'], changeHandler);
+      tracks.addEventListener('change', changeHandler);
+      _this.on('dispose', function () {
+        tracks.removeEventListener('change', changeHandler);
+      });
     }
 
     // iOS7 doesn't dispatch change events to TextTrackLists when an
@@ -86,27 +85,25 @@ var TextTrackMenuItem = function (_MenuItem) {
     // the change event. As a poor substitute, we manually dispatch
     // change events whenever the controls modify the mode.
     if (tracks && tracks.onchange === undefined) {
-      (function () {
-        var event = void 0;
+      var event = void 0;
 
-        _this.on(['tap', 'click'], function () {
-          if (_typeof(_window2['default'].Event) !== 'object') {
-            // Android 2.3 throws an Illegal Constructor error for window.Event
-            try {
-              event = new _window2['default'].Event('change');
-            } catch (err) {
-              // continue regardless of error
-            }
+      _this.on(['tap', 'click'], function () {
+        if (_typeof(_window2['default'].Event) !== 'object') {
+          // Android 2.3 throws an Illegal Constructor error for window.Event
+          try {
+            event = new _window2['default'].Event('change');
+          } catch (err) {
+            // continue regardless of error
           }
+        }
 
-          if (!event) {
-            event = _document2['default'].createEvent('Event');
-            event.initEvent('change', true, true);
-          }
+        if (!event) {
+          event = _document2['default'].createEvent('Event');
+          event.initEvent('change', true, true);
+        }
 
-          tracks.dispatchEvent(event);
-        });
-      })();
+        tracks.dispatchEvent(event);
+      });
     }
     return _this;
   }

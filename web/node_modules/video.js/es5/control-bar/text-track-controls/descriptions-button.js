@@ -57,14 +57,12 @@ var DescriptionsButton = function (_TextTrackButton) {
     var tracks = player.textTracks();
 
     if (tracks) {
-      (function () {
-        var changeHandler = Fn.bind(_this, _this.handleTracksChange);
+      var changeHandler = Fn.bind(_this, _this.handleTracksChange);
 
-        tracks.addEventListener('change', changeHandler);
-        _this.on('dispose', function () {
-          tracks.removeEventListener('change', changeHandler);
-        });
-      })();
+      tracks.addEventListener('change', changeHandler);
+      _this.on('dispose', function () {
+        tracks.removeEventListener('change', changeHandler);
+      });
     }
     return _this;
   }

@@ -452,7 +452,7 @@ var Component = function () {
 
     // If a name wasn't used to create the component, check if we can use the
     // name function of the component
-    componentName = componentName || component.name && component.name();
+    componentName = componentName || component.name && (0, _toTitleCase2['default'])(component.name());
 
     if (componentName) {
       this.childNameIndex_[componentName] = component;
@@ -524,91 +524,89 @@ var Component = function () {
     var children = this.options_.children;
 
     if (children) {
-      (function () {
-        // `this` is `parent`
-        var parentOptions = _this.options_;
+      // `this` is `parent`
+      var parentOptions = this.options_;
 
-        var handleAdd = function handleAdd(child) {
-          var name = child.name;
-          var opts = child.opts;
+      var handleAdd = function handleAdd(child) {
+        var name = child.name;
+        var opts = child.opts;
 
-          // Allow options for children to be set at the parent options
-          // e.g. videojs(id, { controlBar: false });
-          // instead of videojs(id, { children: { controlBar: false });
-          if (parentOptions[name] !== undefined) {
-            opts = parentOptions[name];
-          }
-
-          // Allow for disabling default components
-          // e.g. options['children']['posterImage'] = false
-          if (opts === false) {
-            return;
-          }
-
-          // Allow options to be passed as a simple boolean if no configuration
-          // is necessary.
-          if (opts === true) {
-            opts = {};
-          }
-
-          // We also want to pass the original player options
-          // to each component as well so they don't need to
-          // reach back into the player for options later.
-          opts.playerOptions = _this.options_.playerOptions;
-
-          // Create and add the child component.
-          // Add a direct reference to the child by name on the parent instance.
-          // If two of the same component are used, different names should be supplied
-          // for each
-          var newChild = _this.addChild(name, opts);
-
-          if (newChild) {
-            _this[name] = newChild;
-          }
-        };
-
-        // Allow for an array of children details to passed in the options
-        var workingChildren = void 0;
-        var Tech = Component.getComponent('Tech');
-
-        if (Array.isArray(children)) {
-          workingChildren = children;
-        } else {
-          workingChildren = Object.keys(children);
+        // Allow options for children to be set at the parent options
+        // e.g. videojs(id, { controlBar: false });
+        // instead of videojs(id, { children: { controlBar: false });
+        if (parentOptions[name] !== undefined) {
+          opts = parentOptions[name];
         }
 
-        workingChildren
-        // children that are in this.options_ but also in workingChildren  would
-        // give us extra children we do not want. So, we want to filter them out.
-        .concat(Object.keys(_this.options_).filter(function (child) {
-          return !workingChildren.some(function (wchild) {
-            if (typeof wchild === 'string') {
-              return child === wchild;
-            }
-            return child === wchild.name;
-          });
-        })).map(function (child) {
-          var name = void 0;
-          var opts = void 0;
+        // Allow for disabling default components
+        // e.g. options['children']['posterImage'] = false
+        if (opts === false) {
+          return;
+        }
 
-          if (typeof child === 'string') {
-            name = child;
-            opts = children[name] || _this.options_[name] || {};
-          } else {
-            name = child.name;
-            opts = child;
+        // Allow options to be passed as a simple boolean if no configuration
+        // is necessary.
+        if (opts === true) {
+          opts = {};
+        }
+
+        // We also want to pass the original player options
+        // to each component as well so they don't need to
+        // reach back into the player for options later.
+        opts.playerOptions = _this.options_.playerOptions;
+
+        // Create and add the child component.
+        // Add a direct reference to the child by name on the parent instance.
+        // If two of the same component are used, different names should be supplied
+        // for each
+        var newChild = _this.addChild(name, opts);
+
+        if (newChild) {
+          _this[name] = newChild;
+        }
+      };
+
+      // Allow for an array of children details to passed in the options
+      var workingChildren = void 0;
+      var Tech = Component.getComponent('Tech');
+
+      if (Array.isArray(children)) {
+        workingChildren = children;
+      } else {
+        workingChildren = Object.keys(children);
+      }
+
+      workingChildren
+      // children that are in this.options_ but also in workingChildren  would
+      // give us extra children we do not want. So, we want to filter them out.
+      .concat(Object.keys(this.options_).filter(function (child) {
+        return !workingChildren.some(function (wchild) {
+          if (typeof wchild === 'string') {
+            return child === wchild;
           }
+          return child === wchild.name;
+        });
+      })).map(function (child) {
+        var name = void 0;
+        var opts = void 0;
 
-          return { name: name, opts: opts };
-        }).filter(function (child) {
-          // we have to make sure that child.name isn't in the techOrder since
-          // techs are registerd as Components but can't aren't compatible
-          // See https://github.com/videojs/video.js/issues/2772
-          var c = Component.getComponent(child.opts.componentClass || (0, _toTitleCase2['default'])(child.name));
+        if (typeof child === 'string') {
+          name = child;
+          opts = children[name] || _this.options_[name] || {};
+        } else {
+          name = child.name;
+          opts = child;
+        }
 
-          return c && !Tech.isTech(c);
-        }).forEach(handleAdd);
-      })();
+        return { name: name, opts: opts };
+      }).filter(function (child) {
+        // we have to make sure that child.name isn't in the techOrder since
+        // techs are registerd as Components but can't aren't compatible
+        // See https://github.com/videojs/video.js/issues/2772
+        var c = Component.getComponent(child.opts.componentClass || (0, _toTitleCase2['default'])(child.name));
+
+        return c && !Tech.isTech(c);
+      }).forEach(handleAdd);
     }
   };
 
@@ -668,45 +666,43 @@ var Component = function () {
 
       // Targeting another component or element
     } else {
-      (function () {
-        var target = first;
-        var type = second;
-        var fn = Fn.bind(_this2, third);
+      var target = first;
+      var type = second;
+      var fn = Fn.bind(this, third);
 
-        // When this component is disposed, remove the listener from the other component
-        var removeOnDispose = function removeOnDispose() {
-          return _this2.off(target, type, fn);
-        };
+      // When this component is disposed, remove the listener from the other component
+      var removeOnDispose = function removeOnDispose() {
+        return _this2.off(target, type, fn);
+      };
 
-        // Use the same function ID so we can remove it later it using the ID
-        // of the original listener
-        removeOnDispose.guid = fn.guid;
-        _this2.on('dispose', removeOnDispose);
+      // Use the same function ID so we can remove it later it using the ID
+      // of the original listener
+      removeOnDispose.guid = fn.guid;
+      this.on('dispose', removeOnDispose);
 
-        // If the other component is disposed first we need to clean the reference
-        // to the other component in this component's removeOnDispose listener
-        // Otherwise we create a memory leak.
-        var cleanRemover = function cleanRemover() {
-          return _this2.off('dispose', removeOnDispose);
-        };
+      // If the other component is disposed first we need to clean the reference
+      // to the other component in this component's removeOnDispose listener
+      // Otherwise we create a memory leak.
+      var cleanRemover = function cleanRemover() {
+        return _this2.off('dispose', removeOnDispose);
+      };
 
-        // Add the same function ID so we can easily remove it later
-        cleanRemover.guid = fn.guid;
+      // Add the same function ID so we can easily remove it later
+      cleanRemover.guid = fn.guid;
 
-        // Check if this is a DOM node
-        if (first.nodeName) {
-          // Add the listener to the other element
-          Events.on(target, type, fn);
-          Events.on(target, 'dispose', cleanRemover);
+      // Check if this is a DOM node
+      if (first.nodeName) {
+        // Add the listener to the other element
+        Events.on(target, type, fn);
+        Events.on(target, 'dispose', cleanRemover);
 
-          // Should be a component
-          // Not using `instanceof Component` because it makes mock players difficult
-        } else if (typeof first.on === 'function') {
-          // Add the listener to the other component
-          target.on(type, fn);
-          target.on('dispose', cleanRemover);
-        }
-      })();
+        // Should be a component
+        // Not using `instanceof Component` because it makes mock players difficult
+      } else if (typeof first.on === 'function') {
+        // Add the listener to the other component
+        target.on(type, fn);
+        target.on('dispose', cleanRemover);
+      }
     }
 
     return this;
@@ -783,21 +779,19 @@ var Component = function () {
     if (typeof first === 'string' || Array.isArray(first)) {
       Events.one(this.el_, first, Fn.bind(this, second));
     } else {
-      (function () {
-        var target = first;
-        var type = second;
-        var fn = Fn.bind(_this3, third);
+      var target = first;
+      var type = second;
+      var fn = Fn.bind(this, third);
 
-        var newFunc = function newFunc() {
-          _this3.off(target, type, newFunc);
-          fn.apply(null, _arguments);
-        };
+      var newFunc = function newFunc() {
+        _this3.off(target, type, newFunc);
+        fn.apply(null, _arguments);
+      };
 
-        // Keep the same function ID so we can remove it later
-        newFunc.guid = fn.guid;
+      // Keep the same function ID so we can remove it later
+      newFunc.guid = fn.guid;
 
-        _this3.on(target, type, newFunc);
-      })();
+      this.on(target, type, newFunc);
     }
 
     return this;
@@ -1367,6 +1361,24 @@ var Component = function () {
   };
 
   /**
+   * Set the focus to this component
+   */
+
+
+  Component.prototype.focus = function focus() {
+    this.el_.focus();
+  };
+
+  /**
+   * Remove the focus from this component
+   */
+
+
+  Component.prototype.blur = function blur() {
+    this.el_.blur();
+  };
+
+  /**
    * Emit a 'tap' events when touch event support gets detected. This gets used to
    * support toggling the controls through a tap on the video. They get enabled
    * because every sub-component would have extra overhead otherwise.
@@ -1700,19 +1712,17 @@ var Component = function () {
     }
 
     if (name === 'Player' && Component.components_[name]) {
-      (function () {
-        var Player = Component.components_[name];
+      var Player = Component.components_[name];
 
-        // If we have players that were disposed, then their name will still be
-        // in Players.players. So, we must loop through and verify that the value
-        // for each item is not null. This allows registration of the Player component
-        // after all players have been disposed or before any were created.
-        if (Player.players && Object.keys(Player.players).length > 0 && Object.keys(Player.players).map(function (playerName) {
-          return Player.players[playerName];
-        }).every(Boolean)) {
-          throw new Error('Can not register Player component after player has been created');
-        }
-      })();
+      // If we have players that were disposed, then their name will still be
+      // in Players.players. So, we must loop through and verify that the value
+      // for each item is not null. This allows registration of the Player component
+      // after all players have been disposed or before any were created.
+      if (Player.players && Object.keys(Player.players).length > 0 && Object.keys(Player.players).map(function (playerName) {
+        return Player.players[playerName];
+      }).every(Boolean)) {
+        throw new Error('Can not register Player component after player has been created');
+      }
     }
 
     Component.components_[name] = comp;

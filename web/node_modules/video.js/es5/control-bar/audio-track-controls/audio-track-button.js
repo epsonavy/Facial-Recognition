@@ -81,6 +81,9 @@ var AudioTrackButton = function (_TrackButton) {
   AudioTrackButton.prototype.createItems = function createItems() {
     var items = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
 
+    // if there's only one audio track, there no point in showing it
+    this.hideThreshold_ = 1;
+
     var tracks = this.player_.audioTracks && this.player_.audioTracks();
 
     if (!tracks) {

@@ -72,6 +72,7 @@ var TextTrackButton = function (_TrackButton) {
 
     // Add an OFF menu item to turn all tracks off
     items.push(new _offTextTrackMenuItem2['default'](this.player_, { kind: this.kind_ }));
+    this.hideThreshold_ += 1;
 
     var tracks = this.player_.textTracks();
 

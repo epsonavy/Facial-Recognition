@@ -91,6 +91,7 @@ var ErrorDisplay = function (_ModalDialog) {
 
 
 ErrorDisplay.prototype.options_ = (0, _mergeOptions2['default'])(_modalDialog2['default'].prototype.options_, {
+  pauseOnOpen: false,
   fillAlways: true,
   temporary: false,
   uncloseable: true

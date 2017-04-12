@@ -42,6 +42,22 @@ exports.isPlain = isPlain;
 var toString = Object.prototype.toString;
 
 /**
+ * Get the keys of an Object
+ *
+ * @param {Object}
+ *        The Object to get the keys from
+ *
+ * @return {string[]}
+ *         An array of the keys from the object. Returns an empty array if the
+ *         object passed in was invalid or had no keys.
+ *
+ * @private
+ */
+var keys = function keys(object) {
+  return isObject(object) ? Object.keys(object) : [];
+};
+
+/**
  * Array-like iteration for objects.
  *
  * @param {Object} object
@@ -51,7 +67,7 @@ var toString = Object.prototype.toString;
  *        The callback function which is called for each key in the object.
  */
 function each(object, fn) {
-  Object.keys(object).forEach(function (key) {
+  keys(object).forEach(function (key) {
     return fn(object[key], key);
   });
 }
@@ -76,7 +92,7 @@ function each(object, fn) {
 function reduce(object, fn) {
   var initial = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
 
-  return Object.keys(object).reduce(function (accum, key) {
+  return keys(object).reduce(function (accum, key) {
     return fn(accum, object[key], key);
   }, initial);
 }

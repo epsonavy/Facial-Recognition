@@ -67,35 +67,6 @@ var CaptionsButton = function (_TextTrackButton) {
   };
 
   /**
-   * Update caption menu items
-   *
-   * @param {EventTarget~Event} [event]
-   *        The `addtrack` or `removetrack` event that caused this function to be
-   *        called.
-   *
-   * @listens TextTrackList#addtrack
-   * @listens TextTrackList#removetrack
-   */
-
-
-  CaptionsButton.prototype.update = function update(event) {
-    var threshold = 2;
-
-    _TextTrackButton.prototype.update.call(this);
-
-    // if native, then threshold is 1 because no settings button
-    if (this.player().tech_ && this.player().tech_.featuresNativeTextTracks) {
-      threshold = 1;
-    }
-
-    if (this.items && this.items.length > threshold) {
-      this.show();
-    } else {
-      this.hide();
-    }
-  };
-
-  /**
    * Create caption menu items
    *
    * @return {CaptionSettingsMenuItem[]}
@@ -108,6 +79,8 @@ var CaptionsButton = function (_TextTrackButton) {
 
     if (!(this.player().tech_ && this.player().tech_.featuresNativeTextTracks)) {
       items.push(new _captionSettingsMenuItem2['default'](this.player_, { kind: this.kind_ }));
+
+      this.hideThreshold_ += 1;
     }
 
     return _TextTrackButton.prototype.createItems.call(this, items);
