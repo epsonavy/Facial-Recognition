@@ -13,22 +13,24 @@ router.post('/logout', (req, res, next) => {
 // Dashboard
 router.get('/dashboard', (req, res, next) => {
   if(req.session && req.session.user) {
-  	function getFiles() {
-    	const videosFolder = './public/videos';
-    	const fs = require('fs');
-    	var ary = fs.readdirSync(videosFolder);
-        console.log("videos folder has " + ary.length + " files\n");
-        return ary;
-	}
-	var myFiles = getFiles();
-    db.one("SELECT username, password, first_name, last_name, last_login_time, last_login_ip FROM userdata WHERE username=$1 and password=$2", [req.session.user.username, req.session.user.password])
-      .then(data => {
+    db.tx(t=> {
+        return t.batch([
+            t.one("SELECT username, password, first_name, last_name, last_login_time, last_login_ip FROM userdata WHERE username=$1 and password=$2", [req.session.user.username, req.session.user.password]),
+            t.any("SELECT path FROM user_videos WHERE username=($1)", [req.session.user.username])
+        ]);
+    }).then(data => {
+    	console.log(data[1]);
+    	var myFiles = [];
+    	for (var i = 0, len = data[1].length; i < len; i++) {
+        	var tmp = data[1][i].path.split("/");
+        	myFiles.push(tmp[tmp.length - 1]);
+		}
         res.render('main', {
-              "username": data.username, 
-              "first_name": data.first_name, 
-              "last_name": data.last_name, 
-              "last_login_time": data.last_login_time, 
-              "last_login_ip": data.last_login_ip,
+              "username": data[0].username, 
+              "first_name": data[0].first_name, 
+              "last_name": data[0].last_name, 
+              "last_login_time": data[0].last_login_time, 
+              "last_login_ip": data[0].last_login_ip,
         	  files : myFiles
             });
       })
