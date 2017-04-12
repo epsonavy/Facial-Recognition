@@ -36,8 +36,9 @@ html
           legend Upload a file
           aside(id='select-box')
             form(action='/upload', enctype='multipart/form-data', method='post')
-              input(name='upload', type='file', multiple='multiple', accept='video/*;capture=camcorder')
-              button(type='submit', class='button button-block') Upload
+              input(id='targetFile', name='upload', type='file', multiple='multiple', accept='video/*;capture=camcorder')
+              p(id='uploadMsg') Size Limit: 20MB
+              button(id='uploadButton', type='submit', class='button button-block') Upload
         fieldset
           legend Current Videos in Server
           nav(id='list') 

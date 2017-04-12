@@ -15,4 +15,23 @@ $(document).ready(function() {
             });
      return false; //for good measure
 	});
+
+
+	//binds to onchange event of your input field
+	$('#targetFile').bind('change', function() {
+
+  		//this.files[0].size gets the size of your file.
+  		if (this.files[0].size > 20000000) {
+    		alert('Your file is bigger than 20MB!!!');
+        	// if more than permit amount, disable the upload button
+        	$('#uploadMsg').html('Your file is too big!');
+        	$('#uploadButton').prop('disabled', true);
+        	$('#uploadButton').hide();
+        } else {
+        	$('#uploadMsg').html('ready for uploading:');
+        	$('#uploadButton').prop('disabled', false);
+        	$('#uploadButton').show();
+        }
+
+	});
 });
