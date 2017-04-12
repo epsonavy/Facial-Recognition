@@ -10,6 +10,7 @@ var fs = require('fs');
 router.post('/', multipartMiddleware, function(req, res) {
 	var files = req.files;
 	console.log(files.file);
+	res.redirect('/dashboard');
 
 /*
 	var upload = new Upload();

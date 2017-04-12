@@ -33,14 +33,11 @@ html
 
       .center-area
         fieldset
-          legend Select a file
+          legend Upload a file
           aside(id='select-box')
-            input(id='upload-file', type='file', accept='video/*;capture=camcorder')
-            article(id='progress') Upload Video from phone here
-        fieldset
-          legend Drag n Drop
-          aside(id='upload-box')
-            article(id='progress') Drop Video from PC here
+            form(action='/upload', enctype='multipart/form-data', method='post')
+              input(name='upload', type='file', multiple='multiple', accept='video/*;capture=camcorder')
+              button(type='submit', class='button button-block') Upload
         fieldset
           legend Current Videos in Server
           nav(id='list') 
