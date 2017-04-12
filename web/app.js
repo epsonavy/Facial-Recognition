@@ -17,7 +17,8 @@ var config = require('./config.js');
 var session = require('express-session');
 
 var index = require('./routes/index');
-var auth = require('./routes/auth');
+var upload = require('./routes/upload');
+//var auth = require('./routes/auth');
 
 var app = express();
 app.set('api_secret', config.secret);
@@ -37,7 +38,8 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);
-app.use('/auth', auth);
+app.use('/upload', upload);
+//app.use('/auth', auth);
 
 
 // catch 404 and forward to error handler
