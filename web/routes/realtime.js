@@ -14,8 +14,19 @@ router.post('/', (req, res, next) => {
 	fs.writeFile("./public/videos/out.jpg", base64Data, 'base64', function(err) {
   		console.log(err);
 	});
+	// add __realtime__ with a generated id afterwards
+	//FFKnmfsakfnsaFDKDnsfdsaFKNsdafdSAKNFDSAknffdknsafkanFNKDA__realtime__45cxzCOkdsaNgFDgodngf.pnf
+	//this is how we will split it
     //res.redirect('/');
 	res.end;
+});
+
+router.get('/', (req, res, next) => {
+	//We will add load balancer hijacker here later but for now it is okay
+
+	// We need to pass in the username as the token
+	res.render('realtime', {address: '54.183.94.59', port: 6654, token: "FFKnmfsakfnsaFDKDns.fdsaFKNsdafdSAKNFDSAkn.ffdknsafkanFNKDA"});
+	// Reconnecting will reroute the new socket anyways
 });
 
 module.exports = router;
