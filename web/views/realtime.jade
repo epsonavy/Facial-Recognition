@@ -1,5 +1,32 @@
-extends layout
-
-block content
-  h1= title
-  p Realtime, Connect socket to #{address}:#{port} and send a message #{token} to register your camera as realtime
+doctype html
+html(lang='en')
+  head
+    title Jade
+    script(type='text/javascript').
+      var realtime_view = document.getElementById('realtime');
+      function displayImage(image){
+      //download image
+      //then display
+      console.log("Displaying " + image);
+      downloadImage = new Image();
+      downloadImage.onload = function(){
+      realtime_view.src = this.src;
+      }
+      downloadImage.src = image;
+      }
+      var address = #{address};
+      var port = #{port};
+      var token = #{token};
+      var socket = WebSocket('ws://' + address + ':' + port);
+      socket.onopen = function(){
+      socket.send(token);
+      }
+      socket.onerror = function(error){
+      console.log("An error had occurred " + error);
+      }
+      socket.onmessage = function(e){
+      //receives URL from socket
+      displayImage(e.data);
+      }
+  body
+    img#realtime(width='400', height='300')

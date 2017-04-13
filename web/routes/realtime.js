@@ -15,7 +15,7 @@ router.post('/', (req, res, next) => {
   		console.log(err);
 	});
 	// add __realtime__ with a generated id afterwards
-	//FFKnmfsakfnsaFDKDnsfdsaFKNsdafdSAKNFDSAknffdknsafkanFNKDA__realtime__45cxzCOkdsaNgFDgodngf.pnf
+	//FFKnmfsakfnsaFDKDnsfdsaFKNsdafdSAKNFDSAknffdknsafkanFNKDA__realtime__45cxzCOkdsaNgFDgodngf.png
 	//this is how we will split it
     //res.redirect('/');
 	res.end;
