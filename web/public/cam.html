@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<head>
+	<meta charset="utf-8" />
+	<title>Facial Recognition</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+</head>
+<body>
+
+<video id="video" width="320" height="240" autoplay></video>
+<button id="snap">Snap Photo</button> <br/>
+<canvas id="canvas" width="320" height="240"></canvas>
+
+<script>
+
+		// Put event listeners into place
+		window.addEventListener("DOMContentLoaded", function() {
+			// Grab elements, create settings, etc.
+			var canvas = document.getElementById('canvas');
+			var context = canvas.getContext('2d');
+			var video = document.getElementById('video');
+			var mediaConfig =  { video: true };
+			var errBack = function(e) {
+				console.log('An error has occurred!', e)
+			};
+
+			// Put video listeners into place
+			if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+				navigator.mediaDevices.getUserMedia(mediaConfig).then(function(stream) {
+					video.src = window.URL.createObjectURL(stream);
+					video.play();
+				});
+			}
+
+			/* Legacy code below! */
+			else if(navigator.getUserMedia) { // Standard
+				navigator.getUserMedia(mediaConfig, function(stream) {
+					video.src = stream;
+					video.play();
+				}, errBack);
+			} else if(navigator.webkitGetUserMedia) { // WebKit-prefixed
+				navigator.webkitGetUserMedia(mediaConfig, function(stream){
+					video.src = window.webkitURL.createObjectURL(stream);
+					video.play();
+				}, errBack);
+			} else if(navigator.mozGetUserMedia) { // Mozilla-prefixed
+				navigator.mozGetUserMedia(mediaConfig, function(stream){
+					video.src = window.URL.createObjectURL(stream);
+					video.play();
+				}, errBack);
+			}
+
+        
+$(document).ready(function(){
+	$('#snap').click(function (event){ 
+     //event.preventDefault(); 
+     //$('#summary').html(this.href);
+    context.drawImage(video, 0, 0, 320, 240);
+    var img = canvas.toDataURL("image/jpeg");
+    //alert(img);
+				$.ajax({
+				  type: "POST",
+				  url: "/realtime",
+				  data: { 
+					 imgBase64: img
+				  }
+				}).done(function(o) {
+                  alert("saved!！！！！");
+				  console.log('saved'); 
+				  // If you want the file to be visible in the browser 
+				  // - please modify the callback in javascript. All you
+				  // need is to return the url to the file, you just saved 
+				  // and than put the image in your browser.
+				});
+     return false; //for good measure
+	});
+});
+			/* Trigger photo take
+			document.getElementById('snap').addEventListener('click', function() {
+				context.drawImage(video, 0, 0, 640, 480);
+			});
+
+            <form action="/realtime" method="post">
+                <canvas id="canvas" width="640" height="480"></canvas>
+                <input id="send" type="submit" name="send" />
+            </form>
+            
+            */
+		}, false);
+</script>
+
+</body>

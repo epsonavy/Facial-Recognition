@@ -18,6 +18,7 @@ var session = require('express-session');
 
 var index = require('./routes/index');
 var upload = require('./routes/upload');
+var realtime = require('./routes/realtime');
 //var auth = require('./routes/auth');
 
 var app = express();
@@ -39,6 +40,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);
 app.use('/upload', upload);
+app.use('/realtime', realtime);
 //app.use('/auth', auth);
 
 
