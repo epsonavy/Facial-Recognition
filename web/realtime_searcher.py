@@ -42,8 +42,9 @@ class AcceptThread(threading.Thread):
 			#http://yz.mit.edu/wp/web-sockets-tutorial-with-simple-python-server/
 			token = socket.recv(1024)
 			token = token.replace('\n','') #Get rid of dem new lines
+			token = token.replace('\r','')
+			print "Added socket with token " + token
 			socket_dictionary[token] = socket	
-			socket_dictionary[token].sendall('Added your token ' + token + ' to watch list')
 			readThread = ReadThread(socket)
 			readThread.start()
 			print "Socket is connected!"
@@ -79,15 +80,9 @@ def process_file(path):
 
 	token = filename.split('__realtime__')
 	token = token[0]
-
 	#Waits until matt's script is finished
-	Popen(["python", "../pipeline/Faceline.py", "-i", path, "-o", nginx_system_path]).wait() 
-	try:
-		socket_dictionary[token].sendall(nginx_path)
-	except Exception as e:
-		print "An exception as occurred " + str(e)
-		pass
-
+	#Popen(["python", "../pipeline/Faceline.py", "-i", path, "-o", nginx_system_path]).wait() 
+	socket_dictionary[token].sendall(nginx_path)
 	
 
 def add_file(path):
@@ -111,8 +106,9 @@ while active:
 	for root, subFolders, files in os.walk('./realtime'):
 		for file in files:
 			if file.endswith('.png') or file.endswith('.jpg'):
-				os.rename('./realtime/' + path, './realtime_processing/' + path)
-				file_queue.append('./realtime_processing/' + path)
+				os.rename('./realtime/' + file, './realtime_processing/' + file)
+				file_queue.append('./realtime_processing/' + file)
+				request_semaphore.release()
 	
 	time.sleep(0.05)
 
