@@ -3,6 +3,7 @@ import time
 import threading
 from collections import deque
 import socket
+from subprocess import Popen, PIPE
 
 file_queue = deque()
 active = True
@@ -38,6 +39,7 @@ class AcceptThread(threading.Thread):
 		while active:
 			(socket, address) = server_socket.accept()
 			token = socket.recv(1024)
+			token = token.replace('\n','') #Get rid of dem new lines
 			socket_dictionary[token] = socket	
 			socket_dictionary[token].sendall('Added your token ' + token + ' to watch list')
 			readThread = ReadThread(socket)
@@ -52,6 +54,12 @@ class ReadThread(threading.Thread):
 		1
 		
 		
+class DeleteThread(threading.Thread):
+	def __init__(self):
+		threading.Thread.__init__(self)
+	def run(self):
+		# Need to implement a list with -tr to get the oldest image and unlink it
+		#os.unlink
 		
 		
 
@@ -61,13 +69,24 @@ def process_file(path):
 	os.rename('./realtime/' + path, './realtime_processing/' + path)
 	new_path = './realtime_processing/' + path
 
+
+	#path = epso__realtime__fdsaCKzKNfdsKNfsfdsKFDN.png
+
 	#Run matt's script
 	#Move that finished file into /usr/share/html/static
 	nginx_path = 'https://openface.me/static/' + path
-	token = path.split('_')
+	nginx_system_path = '/usr/share/nginx/html/static/' + path
+
+	token = path.split('__realtime__')
 	token = token[0]
 
-	socket_dictionary[token].sendall(nginx_path)
+	#Waits until matt's script is finished
+	Popen(["python", "../pipeline/Faceline.py", "-i", new_path, "-o", nginx_system_path]).wait() 
+	try:
+		socket_dictionary[token].sendall(nginx_path)
+	except Exception as e:
+		print "An exception as occurred " + str(e)
+		pass
 
 	
 
@@ -84,11 +103,14 @@ for x in range(0, 1):
 acceptThread = AcceptThread()
 acceptThread.start()
 
+deleteThread = DeleteThread()
+deleteThread.start()
 
-while 1:
+
+while active:
 	for root, subFolders, files in os.walk('./realtime'):
 		for file in files:
-			if file.endswith('.png'):
+			if file.endswith('.png') or file.endswith('.jpg'):
 				process_file(file)
 	
 	time.sleep(0.05)
