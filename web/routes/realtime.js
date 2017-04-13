@@ -11,7 +11,7 @@ router.post('/', (req, res, next) => {
 	//console.log(req.body.imgBase64);
 	var base64Data = req.body.imgBase64.replace(/^data:image\/jpeg;base64,/, "");
 	// file output to node js root path /web/out.jpg
-	fs.writeFile("out.jpg", base64Data, 'base64', function(err) {
+	fs.writeFile("./public/videos/out.jpg", base64Data, 'base64', function(err) {
   		console.log(err);
 	});
     //res.redirect('/');

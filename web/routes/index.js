@@ -245,5 +245,18 @@ router.put('/api/updateuser/:user_id', (req, res, next) => {
 
 });
 
+// Delete one video
+router.get('/videos', (req, res, next) => {
+	console.log("delete video section!!");
+    db.none("DELETE FROM user_videos WHERE path=$1", ["public/videos/" + req.query.filename])
+      .then(data => {
+        console.log("Deleted a video!");
+      })
+      .catch(error => {
+          // error;
+          console.error(error);
+      });
+	res.redirect('/dashboard');
+});
 
 module.exports = router;

@@ -42,17 +42,23 @@ html
               button(id='uploadButton', type='submit', class='button button-block') Upload
         fieldset
           legend Current Videos in Server
-          nav(id='list') 
-            ul
-              each file in files
-                li
-                  a(href=file)=file            
+          nav(id='list')
+            form(action='/videos', method='get')
+              ul
+                each file in files
+                  li
+                    a(href=file)=file 
+                    &nbsp;
+                    button(id='deleteThis', name='filename', value=file type='submit') X
         fieldset
           legend Video Player
           video(id='my-player', class='video-js', controls='true', data-setup='{}')
             | <source src="//vjs.zencdn.net/v/oceans.mp4">
             p(class='vjs-no-js') To view this video please enable JavaScript, and consider upgrading to a web browser that
               a(href='http://videojs.com/html5-video-support/' target='_blank') supports HTML5 video
+        fieldset
+          legend Realtime Beta
+          a(href='https://openface.me/cam.html' target='_blank') Realtime test page
       .tab-content
         form(action='/logout', method='post')
           button(type='submit', class='button button-block') Log Out 
