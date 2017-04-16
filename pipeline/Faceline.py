@@ -3,7 +3,7 @@ import os, inspect  # For path handling, file deletion
 import dlib         # For facial recognition (neural network)
 import glob         # For file path handling
 import subprocess   # For running FFMPEG
-import cv2          # image input/output, dependency to be refactored with OpenCV
+import cv2          # image input/output
 import numpy as np  # For array handling
 
 '''
@@ -16,7 +16,6 @@ TO HOOK INTO THE DATABASE (POSTGRES)
 
 '''
 To-Do:
-Meta-Data shit: number of frames, framerate, res
 Head Pos: Yaw, Pitch, Roll
 write detection coords to db
 write eye tracking coords to db
@@ -36,14 +35,14 @@ def displayHelp():
     print(" -t\tDuration of final video\t\t00:01.00")
     print(" -i\tInput file path\t\t\t" + input_path)
     print(" -o\tOutput file path\t\tNamed as input + _final.mp4 unless specified")
+    print(" -v\tVerbose\t\t\tFalse")
     print(" -w\tWait before mutating frame\tFalse")
-    print(" Sample shell input:\t\t\tpython Faceline.py -ss 00:30 -t 00:02 -i /home/hew/Desktop/F/Fash.divx")
+    print(" Sample shell input:\t\t\tpython Faceline.py -l -ss 00:30 -t 00:01 -i /home/hew/Desktop/F/Fash.divx")
 
 def in_rect(r, p):
     return p[0] > r[0] and p[1] > r[1] and p[0] < r[2] and p[1] < r[3] 
 
-def markImg(fn, detector, predictor, draw_mode, newCopy):   # THIS FUNCTION MUTATES FILES
-    img = cv2.imread(fn, 1)                                 # load image with file name
+def markImg(img, detector, predictor, draw_mode):   # THIS FUNCTION MUTATES FILES
     #win.clear_overlay()
     #win.set_image(img)
     detections = detector(img, 1)                           # type(detections) == dlib.rectangles
@@ -75,12 +74,6 @@ def markImg(fn, detector, predictor, draw_mode, newCopy):   # THIS FUNCTION MUTA
                     cv2.line(img, pt2, pt3, (0, 0, 255), 1, 8, 0)
                     cv2.line(img, pt3, pt1, (0, 0, 255), 1, 8, 0)
 
-    if newCopy:
-        nn = fn[:fn.rfind(".")] + "_final.png"
-        cv2.imwrite(nn, img)
-    else:
-        cv2.imwrite(fn, img)                                    #overwrite the image
-
 if __name__ == "__main__":
 
     if len(sys.argv) < 2:
@@ -97,8 +90,9 @@ if __name__ == "__main__":
     draw_mode = "dot"
     start_time = "00:00"
     duration = "00:01"
-    input_path = "/home/hew/Desktop/F/Fash.divx"
+    input_path = ""
     output_path = ""
+    verbose = False
     wait_at_frame = False
 
     if sys.argv[1] == "--help" or sys.argv[1] == "-h":
@@ -124,32 +118,54 @@ if __name__ == "__main__":
                 output_path = input_path[:input_path.rfind(".")] + "_final"+ ".mp4"
         elif arg == "-o":
             output_path = sys.argv[index+1]
+        elif arg == "-v":
+            verbose = True
         elif arg == "-w":
             wait_at_frame = True
+
+    if input_path == "":
+        print("Please enter an input file")
+        exit()
 
     # video_dir = os.path.dirname(input_path), formerly used glob.glob(os.path.join(video_dir, "*.png"))
     detector = dlib.get_frontal_face_detector()
     predictor = dlib.shape_predictor(predictor_path)
 
+    outstream = (None if verbose else open(os.devnull, 'w')) #for redirecting output to nothing as desired
+
     if single_frame:
-        if newCopy or (not wait_at_frame) or raw_input("Overwrite? Y/N ") == "Y":
-            markImg(input_path, detector, predictor, draw_mode, newCopy)
+        if (not wait_at_frame) or raw_input("Overwrite " + fn + " Y/N?") == "Y":
+            img = cv2.imread(input_path, 1)                                                                         # load image with file name
+            print("Image " + str(i) + ": Width - " + str(img.shape[0]) + ", Height - " + str(img.shape[1]))
+            markImg(img, detector, predictor, draw_mode)
+            cv2.imwrite(((input_path[:input_path.rfind(".")] + "_final.png") if newCopy else input_path), img)
         else:
             print("Permission denied.")
     else:
+        metadataProc = subprocess.check_output(["ffprobe", "-show_streams", input_path], stderr=subprocess.STDOUT)
+        metaWidth = metadataProc[metadataProc.find("width="):metadataProc.find("\n", metadataProc.find("width="))]
+        metaHeight = metadataProc[metadataProc.find("height="):metadataProc.find("\n", metadataProc.find("height="))]
+        metaAvgRate = metadataProc[metadataProc.find("avg_frame_rate="):metadataProc.find("\n", metadataProc.find("avg_frame_rate="))]
+        metaFrameNumb = metadataProc[metadataProc.find("nb_frames="):metadataProc.find("\n", metadataProc.find("nb_frames="))]
+        print(metaWidth)
+        print(metaHeight)
+        print(metaAvgRate)
+        print(metaFrameNumb)
         midPath = input_path[:input_path.rfind(".")] + "%d.png"
-        subprocess.call(["ffmpeg", "-ss", start_time, "-t", duration, "-i", input_path, midPath]) # Run FFMPEG, using pngs
+        subprocess.call(["ffmpeg", "-ss", start_time, "-t", duration, "-i", input_path, midPath], stdout=outstream, stderr=subprocess.STDOUT) # Run FFMPEG, using pngs
 
         #win = dlib.image_window()
         g = glob.glob(input_path[:input_path.rfind(".")] + "*.png")
-        for fn in g:                                                                              # iterate over all images
-            if newCopy or (not wait_at_frame) or raw_input("Overwrite? Y/N ") == "Y":
-                markImg(fn, detector, predictor, draw_mode, newCopy)
+        for i, fn in enumerate(g):                                                                              # iterate over all images
+            if (not wait_at_frame) or raw_input("Overwrite " + fn + " Y/N?") == "Y":
+                img = cv2.imread(fn, 1)
+                markImg(img, detector, predictor, draw_mode)
+                cv2.imwrite(((fn[:fn.rfind(".")] + "_final.png") if newCopy else fn), img)
             else:
                 print("Permission denied.")
         if newCopy:
             midPath = midPath[:midPath.rfind(".")] + "_final.png"
-        subprocess.call(["ffmpeg", "-i", midPath, output_path])# Run FFMPEG to rebake the video
+        subprocess.call(["ffmpeg", "-i", midPath, output_path], stdout=outstream, stderr=subprocess.STDOUT)# Run FFMPEG to rebake the video
         if newCopy:
             for f in glob.glob(input_path[:input_path.rfind(".")] + "*_final.png"):
                 os.remove(f)
