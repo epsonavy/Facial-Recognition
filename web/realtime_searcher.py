@@ -1,4 +1,5 @@
 import os
+from random import randint
 import time
 import threading
 from collections import deque
@@ -34,7 +35,7 @@ class AcceptThread(threading.Thread):
 	def run(self):
 		global socket, socket_dictionary
 		server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		server_socket.bind(('127.0.0.1', 6654))
+		server_socket.bind(('127.0.0.1', 6653))
 		server_socket.listen(5)
 		while active:
 			(socket, address) = server_socket.accept()
@@ -81,8 +82,9 @@ def process_file(path):
 	token = filename.split('__realtime__')
 	token = token[0]
 	#Waits until matt's script is finished
-	#Popen(["python", "../pipeline/Faceline.py", "-i", path, "-o", nginx_system_path]).wait() 
-	socket_dictionary[token].sendall(nginx_path)
+	#Popen(["python", "../pipeline/Faceline.py", "-i", path, "-o", nginx_system_path]).wait()
+	time.sleep(randint(0,1))
+	socket_dictionary[token].sendall(nginx_path + '\n')
 	
 
 def add_file(path):
@@ -90,7 +92,7 @@ def add_file(path):
 	file_queue.append(path)
 	request_semaphore.release()
 	
-for x in range(0, 1):
+for x in range(0, 2):
 	processThread = ProcessThread(x)
 	processThread.start()
 	process_threads.append(processThread)
