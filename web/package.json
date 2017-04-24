@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "supervisor ./bin/www"
+    "start": "nodejs ./bin/www"
   },
   "dependencies": {
     "binaryjs": "0.2.1",

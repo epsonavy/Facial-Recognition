@@ -1,9 +1,15 @@
+import sys
+from twisted.python import log
+from twisted.internet import reactor
+from autobahn.twisted.websocket import WebSocketServerProtocol
+from autobahn.twisted.websocket import WebSocketServerFactory
 import os
 import time
 import threading
 from collections import deque
 import socket
 from subprocess import Popen, PIPE
+log.startLogging(sys.stdout)
 
 file_queue = deque()
 active = True
@@ -12,6 +18,25 @@ process_threads = []
 socket_dictionary = {}
 
 request_semaphore = threading.Semaphore(0)
+
+class MyServerProtocol(WebSocketServerProtocol):
+	def onConnect(self, request):
+		global socket_dictionary
+		socket_dictionary[request.protocols[0]] = request
+	def onClose(self, wasClean, code, reason):
+		1
+	def onMessage(self, payload, isBinary):
+		1
+	def sendImageLink(self, token, link):
+		global socket_dictionary
+		client = socket_dictionary[token]
+		if not client == None:
+			reactor.callFromThread(self.sendMessage, client, link)
+factory = WebSocketServerFactory()
+factory.protocol = MyServerProtocol
+reactor.listenTCP(6654, factory)
+reactor.run()
+
 
 class ProcessThread(threading.Thread):
 	def __init__(self, threadID):
@@ -27,34 +52,7 @@ class ProcessThread(threading.Thread):
 				process_file(path)
 				print "Thread #" + str(self.threadID) + " is finished processing."
 
-class AcceptThread(threading.Thread):
-	def __init__(self):
-		threading.Thread.__init__(self)
-	
-	def run(self):
-		global socket, socket_dictionary
-		server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		server_socket.bind(('127.0.0.1', 6654))
-		server_socket.listen(5)
-		while active:
-			(socket, address) = server_socket.accept()
-			#WE NEED TO HANDLE THE WEBSOCKET PROTOCOL HERE
-			#http://yz.mit.edu/wp/web-sockets-tutorial-with-simple-python-server/
-			token = socket.recv(1024)
-			token = token.replace('\n','') #Get rid of dem new lines
-			token = token.replace('\r','')
-			print "Added socket with token " + token
-			socket_dictionary[token] = socket	
-			readThread = ReadThread(socket)
-			readThread.start()
-			print "Socket is connected!"
 
-class ReadThread(threading.Thread):
-	def __init__(self, socket):
-		threading.Thread.__init__(self)
-		self.socket = socket
-	def run(self):
-		1
 		
 		
 class DeleteThread(threading.Thread):
@@ -75,14 +73,15 @@ def process_file(path):
 
 	#Run matt's script
 	#Move that finished file into /usr/share/html/static
-	nginx_path = 'https://openface.me/static/' + filename
+	nginx_path = 'http://52.53.243.111/static/' + filename
 	nginx_system_path = '/usr/share/nginx/html/static/' + filename
 
 	token = filename.split('__realtime__')
 	token = token[0]
 	#Waits until matt's script is finished
-	#Popen(["python", "../pipeline/Faceline.py", "-i", path, "-o", nginx_system_path]).wait() 
-	socket_dictionary[token].sendall(nginx_path)
+	Popen(["python", "../pipeline/Faceline.py", "-i", path, "-o", nginx_system_path]).wait() 
+
+	MyServerProtocol.sendImageLink(token, nginx_path)
 	
 
 def add_file(path):
@@ -95,9 +94,6 @@ for x in range(0, 1):
 	processThread.start()
 	process_threads.append(processThread)
 	
-acceptThread = AcceptThread()
-acceptThread.start()
-
 deleteThread = DeleteThread()
 deleteThread.start()
 
