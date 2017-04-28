@@ -1,8 +1,7 @@
 const express = require('express');
 const router = express.Router();
 var db = require('./db.js');
-
-
+var fs = require('fs');
 
 // Logout
 router.post('/logout', (req, res, next) => {
@@ -134,14 +133,9 @@ router.post('/api/register', (req, res, next) => {
           db.none("INSERT INTO userdata(username, password, first_name, last_name, last_login_time, last_login_ip, email) values($1, $2, $3, $4, $5, $6, $7)", [reqData.username, reqData.password, reqData.first_name, reqData.last_name, reqData.last_login_time, reqData.last_login_ip, reqData.email])
             .then(data => {
               console.log("Inserted new user!");
-              res.render('main', {
-                "username": reqData.username, 
-                "first_name": reqData.first_name, 
-                "last_name": reqData.last_name, 
-                "last_login_time": reqData.last_login_time, 
-                "last_login_ip": reqData.last_login_ip
-              });
-
+              // Store session data 
+              req.session.user = reqData;
+              res.redirect('/dashboard');
             })
             .catch(error => {
                 // error;
@@ -250,6 +244,7 @@ router.get('/videos', (req, res, next) => {
 	console.log("delete video section!!");
     db.none("DELETE FROM user_videos WHERE path=$1", ["public/videos/" + req.query.filename])
       .then(data => {
+        fs.unlink("public/videos/" + req.query.filename);
         console.log("Deleted a video!");
       })
       .catch(error => {

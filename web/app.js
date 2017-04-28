@@ -5,13 +5,6 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
-// add BinaryServer here
-var BinaryServer = require('binaryjs').BinaryServer;
-var video        = require('./lib/video');
-
-// BinaryServer on port 9000
-var bs = new BinaryServer({ port: 9000 });
-
 var config = require('./config.js');
 
 var session = require('express-session');
@@ -60,28 +53,6 @@ app.use(function(err, req, res, next) {
   // render the error page
   res.status(err.status || 500);
   res.render('error');
-});
-
-// Binaryserver <==> ./lib/video.js
-bs.on('connection', function (client) {
-    client.on('stream', function (stream, meta) {
-        switch(meta.event) {
-        // list available videos
-        case 'list':
-            video.list(stream, meta);
-            break;
- 
-        // request for a video
-        case 'request':
-            video.request(client, meta);
-            break;
- 
-        // attempt an upload
-        case 'upload':
-        default:
-            video.upload(stream, meta);
-        }
-    });
 });
 
 module.exports = app;
