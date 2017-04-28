@@ -9,23 +9,26 @@ var db = require('./db.js');
 
 router.post('/', (req, res, next) => {
 	//console.log(req.body.imgBase64);
-	var base64Data = req.body.imgBase64.replace(/^data:image\/jpeg;base64,/, "");
+	//var base64Data = req.body.imgBase64.replace(/^data:image\/jpeg;base64,/, "");
 	// file output to node js root path /web/out.jpg
-	fs.writeFile("./public/videos/out.jpg", base64Data, 'base64', function(err) {
-  		console.log(err);
+	var base64Data = req.body.imgBase64
+	var url = "./realtime/peter__realtime__" + req.body.count + ".png";
+	console.log(req.body.count);
+	fs.writeFile(url, base64Data, function(err) {
+  		console.log("never get the image!!");
 	});
 	// add __realtime__ with a generated id afterwards
 	//FFKnmfsakfnsaFDKDnsfdsaFKNsdafdSAKNFDSAknffdknsafkanFNKDA__realtime__45cxzCOkdsaNgFDgodngf.png
 	//this is how we will split it
     //res.redirect('/');
-	res.end;
+	res.json({ success : true});
 });
 
 router.get('/', (req, res, next) => {
 	//We will add load balancer hijacker here later but for now it is okay
 
 	// We need to pass in the username as the token
-	res.render('realtime', {address: '54.183.94.59', port: 6654, token: "FFKnmfsakfnsaFDKDns.fdsaFKNsdafdSAKNFDSAkn.ffdknsafkanFNKDA"});
+	res.render('realtime', {address: '52.53.243.111', port: 6654, token: "peter"});
 	// Reconnecting will reroute the new socket anyways
 });
 

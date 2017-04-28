@@ -1,8 +1,8 @@
 import sys
 from twisted.python import log
-from twisted.internet import reactor
+from twisted.internet import reactor, ssl
 from autobahn.twisted.websocket import WebSocketServerProtocol
-from autobahn.twisted.websocket import WebSocketServerFactory
+from autobahn.twisted.websocket import WebSocketServerFactory, listenWS
 import os
 import time
 import threading
@@ -19,23 +19,28 @@ socket_dictionary = {}
 
 request_semaphore = threading.Semaphore(0)
 
+contextFactory = ssl.DefaultOpenSSLContextFactory('/etc/nginx/ssl/nginx.key', '/etc/nginx/ssl/nginx.crt')
+
 class MyServerProtocol(WebSocketServerProtocol):
 	def onConnect(self, request):
 		global socket_dictionary
 		socket_dictionary[request.protocols[0]] = request
+		print "A client has connected!"
 	def onClose(self, wasClean, code, reason):
 		1
 	def onMessage(self, payload, isBinary):
 		1
-	def sendImageLink(self, token, link):
-		global socket_dictionary
-		client = socket_dictionary[token]
-		if not client == None:
-			reactor.callFromThread(self.sendMessage, client, link)
-factory = WebSocketServerFactory()
-factory.protocol = MyServerProtocol
-reactor.listenTCP(6654, factory)
-reactor.run()
+	@classmethod
+	def sendImageLink(self,  token, link):
+		global socket_dictionary, factory
+		print "Image was processed. Sending now"
+		try:
+			client = socket_dictionary[token]
+			if not client == None:
+				reactor.callFromThread(factory.protocol.sendMessage, client, link)
+		except Exception as e :
+			print "Error ocurred: " + str(e)
+			pass
 
 
 class ProcessThread(threading.Thread):
@@ -68,6 +73,7 @@ class DeleteThread(threading.Thread):
 			
 def process_file(path):
 	global socket_dictionary
+	print "Currently processing file " + path
 	filename = path.replace('./realtime_processing/', '')
 	#path = ./realtime_processing/epso__realtime__fdsaCKzKNfdsKNfsfdsKFDN.png
 
@@ -79,8 +85,9 @@ def process_file(path):
 	token = filename.split('__realtime__')
 	token = token[0]
 	#Waits until matt's script is finished
-	Popen(["python", "../pipeline/Faceline.py", "-i", path, "-o", nginx_system_path]).wait() 
-
+	Popen(["python", "../pipeline/Faceline_Realtime.py", "-f", "-i", path, "-o", nginx_system_path]).wait() 
+	print "File from " + path
+	print "File should be moved to " + nginx_system_path
 	MyServerProtocol.sendImageLink(token, nginx_path)
 	
 
@@ -89,7 +96,7 @@ def add_file(path):
 	file_queue.append(path)
 	request_semaphore.release()
 	
-for x in range(0, 1):
+for x in range(0, 2):
 	processThread = ProcessThread(x)
 	processThread.start()
 	process_threads.append(processThread)
@@ -97,16 +104,30 @@ for x in range(0, 1):
 deleteThread = DeleteThread()
 deleteThread.start()
 
+factory = WebSocketServerFactory(u"wss://0.0.0.0:6654")
+
+class FactoryThread(threading.Thread):
+	def __init__(self):
+		threading.Thread.__init__(self)
+	def run(self):
+		global contextFactory, factory
+		factory.protocol = MyServerProtocol
+		reactor.listenSSL(6654, factory, contextFactory)
+		reactor.run(installSignalHandlers=False)
+
+factoryThread = FactoryThread()
+factoryThread.start()
+
 
 while active:
 	for root, subFolders, files in os.walk('./realtime'):
 		for file in files:
 			if file.endswith('.png') or file.endswith('.jpg'):
+				print "Found an image. Ready to process"
 				os.rename('./realtime/' + file, './realtime_processing/' + file)
 				file_queue.append('./realtime_processing/' + file)
 				request_semaphore.release()
 	
-	time.sleep(0.05)
 
 
 
