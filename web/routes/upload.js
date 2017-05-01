@@ -1,6 +1,6 @@
 var express = require('express');
 var multipart = require('connect-multiparty');
-var multipartMiddleware = multipart({ uploadDir: './public/videos/' });
+var multipartMiddleware = multipart({ uploadDir: './uploading' });
 var router = express.Router();
 var config = require('../config.js');
 var fs = require('fs');
@@ -13,15 +13,19 @@ router.post('/', multipartMiddleware, function(req, res) {
 	console.log(files.upload.path);
 	console.log(req.body.username);
 
-	db.none("INSERT INTO user_videos(path, username) values($1, $2)", [files.upload.path, req.body.username])
-            .then(data => {
-              console.log("Inserted new video!");
-			  res.redirect('/dashboard');
-            })
-            .catch(error => {
+	fs.createReadStream(files.upload.path).pipe(fs.createWriteStream('/Facial-Recognition/web/processing/' + req.body.username + '.mp4'));
+	fs.unlink(files.upload.path, function(err){
+		if(err) throw err;
+	});
+	//db.none("INSERT INTO user_videos(path, username) values($1, $2)", [files.upload.path, req.body.username])
+          //  .then(data => {
+            //  console.log("Inserted new video!");
+	//		  res.redirect('/dashboard');
+          //  })
+           // .catch(error => {
                 // error;
-                console.error(error);
-            });
+           //     console.error(error);
+           // });
 
 	res.redirect('/dashboard');
 
