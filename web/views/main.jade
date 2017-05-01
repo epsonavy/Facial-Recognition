@@ -33,7 +33,7 @@ html
 
       .center-area
         fieldset
-          legend Upload a file
+          legend Upload your video
           aside(id='select-box')
             form(action='/upload', enctype='multipart/form-data', method='post')
               input(id='targetFile', name='upload', type='file', multiple='multiple', accept='video/*;capture=camcorder')
@@ -41,15 +41,18 @@ html
               p(id='uploadMsg') Size Limit: 20MB
               button(id='uploadButton', type='submit', class='button button-block') Upload
         fieldset
-          legend Current Videos in Server
+          legend Current Videos you have
           nav(id='list')
             form(action='/videos', method='get')
               ul
-                each file in files
-                  li
-                    a(href=file)=file 
-                    &nbsp;
-                    button(id='deleteThis', name='filename', value=file type='submit') X
+                if files
+                  each file in files
+                    li
+                      a(href=file)=file 
+                      &nbsp;
+                      button(id='deleteThis', name='filename', value=file type='submit') X
+                else
+                  h1 No videos exist
         fieldset
           legend Video Player
           video(id='my-player', class='video-js', controls='true', data-setup='{}')
