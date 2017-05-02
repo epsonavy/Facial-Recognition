@@ -109,13 +109,23 @@ class DeleteThread(threading.Thread):
 def process_file(path):
 	global socket_dictionary, detector, predictor, count, conn
 	#os.system("python ../pipeline/Faceline_Realtime.py -f -i " + path + " -o " + nginx_system_path)
+	count = count + 1	
 	output_path = path.replace('./processing/', '')
-	relative_path =  'public/videos/' + output_path
+	filename = output_path.replace('.mp4', '') + '.mp4'
+
+	relative_path =  'public/videos/' + filename
 	username = output_path.replace('.mp4', '')
-	output_path = '/Facial-Recognition/web/public/videos/' + output_path
-	Popen(['python', '../pipeline/Faceline.py', '-i', path, '-o', output_path]).wait()
+	print "The username is " +  username
+	print "Relative path " + relative_path
+	print "Filename is " + filename
+	output_path = '/Facial-Recognition/web/public/videos/' + filename
+	print "-i " + path
+	print "-o " + output_path
+	Popen(['python', '../pipeline/Faceline.py', '-i', '/Facial-Recognition/web/processing/' + filename, '-o', output_path]).wait()
 	cur = conn.cursor()
 	cur.execute("INSERT INTO user_videos(path, username) values('" + relative_path + "', '" + username + "')" )
+	os.unlink(path)
+	print "Inserted video into database. Now ready to view"
 	#Write into database now
 
 
@@ -128,6 +138,7 @@ for x in range(0, 2):
 while active:
 	for root, dirnames, filenames in os.walk('./processing'):
 		for filename in filenames:
-			file_queue.append('./processing/' + filename)	
-			request_semaphore.release()
+			if filename.endswith(".mp4"):
+				print "Added file " + filename + " to processing queue"
+				process_file('./processing/' + filename)
 	time.sleep(1)
