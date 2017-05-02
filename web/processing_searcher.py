@@ -111,7 +111,8 @@ def process_file(path):
 	#os.system("python ../pipeline/Faceline_Realtime.py -f -i " + path + " -o " + nginx_system_path)
 	count = count + 1	
 	output_path = path.replace('./processing/', '')
-	filename = output_path.replace('.mp4', '') + '.mp4'
+	true_filename = output_path.replace('.mp4', '') + '.mp4'
+	filename = output_path.replace('.mp4', '') + str(count) + '.mp4'
 
 	relative_path =  'public/videos/' + filename
 	username = output_path.replace('.mp4', '')
@@ -121,9 +122,13 @@ def process_file(path):
 	output_path = '/Facial-Recognition/web/public/videos/' + filename
 	print "-i " + path
 	print "-o " + output_path
-	Popen(['python', '../pipeline/Faceline.py', '-i', '/Facial-Recognition/web/processing/' + filename, '-o', output_path]).wait()
+
+	Popen(['python', '../pipeline/Faceline.py', '-l', '-i', '/Facial-Recognition/web/processing/' + true_filename, '-o', output_path, '-v']).wait()
+	print "python ../pipeline/Faceline.py -l -i /Facial-Recognition/web/processing/" + true_filename + " -o " + output_path + " -v"
 	cur = conn.cursor()
-	cur.execute("INSERT INTO user_videos(path, username) values('" + relative_path + "', '" + username + "')" )
+	cur.execute("INSERT INTO user_videos(path, username) values('" + relative_path + "', '" + username + "');" )
+	conn.commit()
+	print "INSERT INTO user_videos(path, username) values('" + relative_path + "', '" + username + "');"
 	os.unlink(path)
 	print "Inserted video into database. Now ready to view"
 	#Write into database now

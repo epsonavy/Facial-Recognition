@@ -17,15 +17,16 @@ router.post('/', multipartMiddleware, function(req, res) {
 	fs.unlink(files.upload.path, function(err){
 		if(err) throw err;
 	});
-	//db.none("INSERT INTO user_videos(path, username) values($1, $2)", [files.upload.path, req.body.username])
-          //  .then(data => {
-            //  console.log("Inserted new video!");
-	//		  res.redirect('/dashboard');
-          //  })
-           // .catch(error => {
-                // error;
-           //     console.error(error);
-           // });
+/*
+	db.none("INSERT INTO user_videos(path, username) values($1, $2)", [files.upload.path, req.body.username])
+            .then(data => {
+              console.log("Inserted new video!");
+			  res.redirect('/dashboard');
+            })
+            .catch(error => {
+                 error;
+                console.error(error);
+           });*/
 
 	res.redirect('/dashboard');
 
