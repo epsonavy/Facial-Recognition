@@ -14,7 +14,7 @@ body {
   height: 100%;
 }
 
-.content {
+.form {
   position: relative;
   z-index: 2;
   background: #000000;
@@ -61,7 +61,7 @@ a:hover {
   color: #bf360c;
 }
 
-.form {
+.form2 {
   position: relative;
   z-index: 2;
   background: #000000;
