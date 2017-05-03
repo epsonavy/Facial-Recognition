@@ -202,7 +202,7 @@ if __name__ == "__main__":
 	#write metadata to DB
         
         midPath = input_path[:input_path.rfind(".")] + "%d.png"
-        ffmpegBreak = subprocess.Popen(["ffmpeg", "-ss", start_time, "-t", duration, "-i", input_path, midPath], stdout=outstream, stderr=subprocess.STDOUT) # Run FFMPEG, using pngs
+        ffmpegBreak = subprocess.Popen(["ffmpeg","-i", input_path, midPath], stdout=outstream, stderr=subprocess.STDOUT) # Run FFMPEG, using pngs
 	ffmpegBreak.wait()
 
         g = glob.glob(input_path[:input_path.rfind(".")] + "*.png")

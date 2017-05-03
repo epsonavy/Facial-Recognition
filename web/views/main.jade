@@ -15,25 +15,25 @@ html
 
   body
   .form2
-      h1.title Welcome
+      h1.title Welcome #{first_name} #{last_name}
       .profile
+        h2 
+          u User Information
         table
           tr
-            td(id='first-col', rowspan='5')
-              img(id='pic', src='/profile.png')
+            td(class='lighter') Username
             td #{username}
           tr
-            td #{first_name}
+            td(class='lighter') Last Login
+            td #{last_login_time}
           tr
-            td #{last_name}
-          tr
-            td Last Login: #{last_login_time}
-          tr
-            td IP: #{last_login_ip}
-
+            td(class='lighter') IP address
+            td #{last_login_ip}
+        h2 
+          u Control Panel
       .center-area
         fieldset
-          legend Upload your video
+          legend Upload Facial Video
           aside(id='select-box')
             form(action='/upload', enctype='multipart/form-data', method='post')
               input(id='targetFile', name='upload', type='file', multiple='multiple', accept='video/*;capture=camcorder')
@@ -41,7 +41,7 @@ html
               p(id='uploadMsg') Size Limit: 20MB
               button(id='uploadButton', type='submit', class='button button-block') Upload
         fieldset
-          legend Current Videos you have
+          legend My Videos Folder
           nav(id='list')
             form(action='/videos', method='get')
               ul
@@ -60,8 +60,8 @@ html
             p(class='vjs-no-js') To view this video please enable JavaScript, and consider upgrading to a web browser that
               a(href='http://videojs.com/html5-video-support/' target='_blank') supports HTML5 video
         fieldset
-          legend Realtime Beta
-          a(href='https://54.67.28.176/camtest/demos/camtest.html' target='_blank') Realtime test page
+          legend Extra Feature - Beta
+          a(href='https://54.67.28.176/camtest/demos/camtest.html' target='_blank') Realtime on Webcam
       .tab-content
         form(action='/logout', method='post')
           button(type='submit', class='button button-block') Log Out 

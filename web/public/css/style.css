@@ -112,20 +112,20 @@ a:hover {
 .profile {
   color: #ffffff;
   font-weight: 500;
-  text-align: right;
+  text-align: left;
 }
 
 .profile table {
   width: 100%;
 }
 
+.lighter {
+  color: #999999;
+}
+
 #pic {
   width: 50%;
   float: left;
-}
-
-.profile:not(#pic) {
-
 }
 
 h1 {
