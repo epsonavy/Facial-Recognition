@@ -101,5 +101,27 @@
 
 <script src="js/index.js"></script>
 
+<video id="my-video" class="video" muted loop>
+  <source src="bg.mp4" type="video/mp4">
+  <source src="bg.ogv" type="video/ogg">
+  <source src="bg.webm" type="video/webm">
+</video>
+
+<script>
+(function() {
+  /**
+   * Video element
+   * @type {HTMLElement}
+   */
+  var video = document.getElementById("my-video");
+  /**
+   * Check if video can play, and play it
+   */
+  video.addEventListener( "canplay", function() {
+    video.play();
+  });
+})();
+</script>
+
 </body>
 </html>
