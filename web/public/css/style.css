@@ -14,6 +14,18 @@ body {
   height: 100%;
 }
 
+.content {
+  position: relative;
+  z-index: 2;
+  background: #000000;
+  opacity: .8;
+  padding: 40px;
+  max-width: 600px;
+  margin: 40px auto;
+  border-radius: 4px;
+  box-shadow: 0 4px 10px 4px rgba(19, 35, 47, 0.3);
+}
+
 .video {
   position: fixed;
   top: 50%; left: 50%;
@@ -25,6 +37,8 @@ body {
   transform: translate(-50%, -50%);
 }
 
+/* =========================================== */
+
 *, *:before, *:after {
   box-sizing: border-box;
 }
@@ -34,6 +48,7 @@ html {
 }
 
 body {
+  background: #9e9e9e;
   font-family: 'Titillium Web', sans-serif;
 }
 a {
@@ -50,9 +65,8 @@ a:hover {
   position: relative;
   z-index: 2;
   background: #000000;
-  opacity: .8;
   padding: 40px;
-  max-width: 600px;
+  max-width: 800px;
   margin: 40px auto;
   border-radius: 4px;
   box-shadow: 0 4px 10px 4px rgba(19, 35, 47, 0.3);
