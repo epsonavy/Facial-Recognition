@@ -26,6 +26,7 @@ write eye tracking coords to db
 lazy_output_file = None
 global_script_start = datetime.now() 
 URI_Handling = False
+#Prints the CLI help menu
 def displayHelp():
     print(" Available Arguments\t\t\tDefault Arguments")
     print(" -h\tAccess the help menu (--help)")
@@ -42,15 +43,22 @@ def displayHelp():
     print(" -w\tWait before mutating frame\tFalse")
     print(" Sample shell input:\t\t\tpython Faceline.py -l -ss 00:30 -t 00:01 -i /home/hew/Desktop/F/Fash.divx")
 
+#Returns boolean representing whether point 1 or point two is within the points of rectangle r
 def in_rect(r, p):
     return p[0] > r[0] and p[1] > r[1] and p[0] < r[2] and p[1] < r[3] 
 
+#Takes URI of data location and converts it to a cv2 image.
 def data_uri_to_cv2_img(uri):
     encoded_data = uri.split(',')[1]
     nparr = np.fromstring(encoded_data.decode('base64'), np.uint8)
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
     return img
 
+# Takes in an image, list of points,
+# breadthList which is a list of all of the hypotenuses, and a frame to wait at,
+# Draws Delaunay triangles across points within the
+# Bounded area. Achieved by subdividing and then drawing lines for each tri
+# using OpenCV Delaunay triangle algorithm succeeded by cv2 line drawing.
 def markFrame(img, ptsList, breadthList, wait_at_frame):
     if(not wait_at_frame) or raw_input("Overwrite " + fn + " Y/N?") == "Y":
 	print("\t\tBeginning Delauney drawing algorithm")
@@ -78,6 +86,8 @@ def markFrame(img, ptsList, breadthList, wait_at_frame):
     else:
         print("Permission denied.")
 
+#Draws Lines related to pupils on an input image,
+#at points pupil data across hypotenuses in breadthList, waits a given frame.
 def markPupil(img, pupilData, breadthList, wait_at_frame):
     print("\t\tDrawing pupils to image.")
     if (not wait_at_frame) or raw_input("Overwrite " + fn + " Y/N?") == "Y":
@@ -94,8 +104,8 @@ def markPupil(img, pupilData, breadthList, wait_at_frame):
     else:
 	print("Permission denied.")
 
-
-def detectFrame(img, detector, predictor): # returns a list of lists of points
+#Takes an image, detector and predictor and returns a list of lists of points and a list of hypotenuses
+def detectFrame(img, detector, predictor):
     print("\t\tBeginning detection")
     tstart = datetime.now()
     detections = detector(img, 1)# type(detections) == dlib.rectangles
@@ -121,6 +131,8 @@ def detectFrame(img, detector, predictor): # returns a list of lists of points
 
     return ptsList, breadthList
 
+#Magic function that takes an input path and uses FFprobe to check for metadata including
+#width, height, average frame rate and number of frames for a video and returns it in a list.
 def getMetadata(input_path):
     ffprobe = subprocess.Popen(["ffprobe", "-show_streams", input_path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     ffprobe.wait()
@@ -133,6 +145,7 @@ def getMetadata(input_path):
     
     return [metaWidth, metaHeight, metaAvgRate, metaFrameNumb]	
 
+#Returns a list of pupil data acquired using eyeLine, a modified version of Tristan Hume's eyeLike
 def getPupilData(input_path):
     print("\t\tsubprocessing pupil data")
     tstart = datetime.now()
@@ -156,6 +169,7 @@ def getPupilData(input_path):
     print("\t\t" + str(tend - tstart))
     return pupilData
 
+#Does frame processing such as calling mark frame and mark pupil
 def handleFrame(input_path, detector, predictor, wait_at_frame):
     global lazy_output_file, global_script_start
     print("\tBase encoding time")
