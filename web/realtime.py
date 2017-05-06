@@ -177,7 +177,10 @@ class MyServerProtocol(WebSocketServerProtocol):
 		global socket_dictionary
 		print "A client has connected!"
 	def onClose(self, wasClean, code, reason):
-		1
+		os.system("sudo rm -r -f /Facial-Recognition/web/realtime_processing/*")
+		os.system("sudo rm -r -f /usr/share/nginx/html/static/*")
+		print "Pei is gay"
+		print "Openface Realtime closed"
 	def onMessage(self, payload, isBinary):
 		global count
 		#payload becomes the jpg
@@ -239,7 +242,7 @@ def process_file(path):
 
 	#Run matt's script
 	#Move that finished file into /usr/share/html/static
-	nginx_path = 'https://54.67.30.141/static/' + filename
+	nginx_path = 'https://openface.me/static/' + filename
 	nginx_system_path = '/usr/share/nginx/html/static/' + filename
 
 	token = filename.split('__realtime__')
