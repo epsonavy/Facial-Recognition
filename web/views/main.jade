@@ -53,15 +53,15 @@ html
                       button(id='deleteThis', name='filename', value=file type='submit') X
                 else
                   h1 No videos exist
-        fieldset
+        fieldset(class='long')
           legend Video Player
           video(id='my-player', class='video-js', controls='true', data-setup='{}')
             | <source src="//vjs.zencdn.net/v/oceans.mp4">
             p(class='vjs-no-js') To view this video please enable JavaScript, and consider upgrading to a web browser that
               a(href='http://videojs.com/html5-video-support/' target='_blank') supports HTML5 video
-        fieldset
+        fieldset(class='long')
           legend Extra Feature - Beta
-          a(href='https://54.67.28.176/camtest/demos/camtest.html' target='_blank') Realtime on Webcam
+          a(href='https://openface.me/camtest/demos/camtest.html' target='_blank') Realtime on Webcam
       .tab-content
         form(action='/logout', method='post')
           button(type='submit', class='button button-block') Log Out 
