@@ -25,6 +25,7 @@ URI_Handling = False
 glbJson = {}
 glbJsonFcount = 0
 glbJsonPcount = 0
+glbJsonPYRcount = 0
 
 #Prints the CLI help menu
 def displayHelp():
@@ -54,36 +55,71 @@ def data_uri_to_cv2_img(uri):
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
     return img
 
+def approximatePYR(ptsList, verbose):
+    global glbJson, glbJsonPYRcount
+    print("\tBeginning pitch, yaw, roll calculations")
+    tstart = datetime.now()
+    pitchList = []
+    yawList = []
+    rollList = []
+
+    if ptsList[0][0] == (-1, -1):
+	print("\t\t(No detection)")
+    else:
+	print("\t\tCalculating Pitch")
+	print("\t\tCalculating Yaw")
+        print("\t\tCalculating Roll")
+        for i, pts in enumerate(ptsList):
+	    print("\t\tFor face detection " + str(i))
+	    leftCorner = pts[36]
+	    rightCorner = pts[45]
+	    noseBridge = pts[28]
+
+	    leftDiag = [leftCorner[0] - noseBridge[0], leftCorner[1] - noseBridge[1]]
+	    rightDiag = [rightCorner[0] - noseBridge[0], rightCorner[1] - rightCorner[1]]
+
+	    leftRads = np.arctan(float(leftDiag[1])/leftDiag[0])
+	    leftDegs = leftRads * 180 / 3
+	    rightRads = np.arctan(float(rightDiag[1])/rightDiag[0])
+	    rightDegs = rightRads * 180 / 3
+	    roll = leftDegs - rightDegs
+	    rollList.append(roll)
+	    if verbose:
+		print("\t\t\tLeft corner is " + str(leftCorner))
+		print("\t\t\tRight corner is " + str(rightCorner))
+		print("\t\t\tNose bridge is " + str(noseBridge))
+		print("\t\t\tleft diagonal is " + str(leftDiag))
+		print("\t\t\tright diagonal is " + str(rightDiag))
+		print("\t\t\tleft angle is " + str(leftDegs) + " Degs, " + str(leftRads) + " Rads")
+		print("\t\t\tright angle is " + str(rightDegs) + "Degs, " + str(rightRads) + " Rads")
+		print("\t\t\tRoll is " + str(roll))
+
+    glbJson["PYR" + str(glbJsonPYRcount)] = [pitchList, yawList, rollList]
+    glbJsonPYRcount += 1
+    tend = datetime.now()
+    print("\t\t" + str(tend - tstart))
+    return pitchList, yawList, rollList
+
 # Takes in an image, list of points,
 # breadthList which is a list of all of the hypotenuses, and a frame to wait at,
 # Draws Delaunay triangles across points within the
 # Bounded area. Achieved by subdividing and then drawing lines for each tri
 # using OpenCV Delaunay triangle algorithm succeeded by cv2 line drawing.
-def markFrame(img, ptsList, breadthList, wait_at_frame):
+def markFrame(img, ptsList, breadthList, rollList, wait_at_frame):
     if(not wait_at_frame) or raw_input("Overwrite " + fn + " Y/N?") == "Y":
-	print("\t\tBeginning Delauney drawing algorithm")
+	print("\tBeginning Delauney drawing")
 	tstart = datetime.now()
 	if ptsList[0] == [(-1, -1)]:
 	    print("\t\tNaught to mark")
 	else:
 	    i = 0
             for pts in ptsList:
-
+		cv2.putText(img, "Roll: " + str(rollList[i]) + " Deg", (0, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0), 3)
 	        bounds = (0, 0, img.shape[1], img.shape[0])
                 subdiv = cv2.Subdiv2D(bounds)
                 for p in pts:
-		    try:
-                        subdiv.insert(p)
-		    except cv2.error as wtf:
-			print("\t\tYou tried to insert " + str(p))
-			print("\t\tThe points list is " + str(pts) + "and the iteration is " + str(i))
-			print("\t\tThe list of points lists is " + str(ptsList))
-			print("\t\tThe image shape is " + str(img.shape))
-			print("\t\tYou're pretty awesome btw.")
-			print(str(wtf))
-			exit(1)
-
-                tris = subdiv.getTriangleList();
+		    subdiv.insert(p)
+		tris = subdiv.getTriangleList();
                 for t in tris:
                     pt1 = (t[0], t[1])
                     pt2 = (t[2], t[3])
@@ -102,7 +138,7 @@ def markFrame(img, ptsList, breadthList, wait_at_frame):
 #Draws Lines related to pupils on an input image,
 #at points pupil data across hypotenuses in breadthList, waits a given frame.
 def markPupil(img, pupilData, breadthList, wait_at_frame):
-    print("\t\tDrawing pupils to image.")
+    print("\tBeginning pupil marking")
     if (not wait_at_frame) or raw_input("Overwrite " + fn + " Y/N?") == "Y":
         tstart = datetime.now()
         i = 0
@@ -111,6 +147,8 @@ def markPupil(img, pupilData, breadthList, wait_at_frame):
 	        pupilArray = np.array(pupil, np.int32).reshape((-1, 1, 2))
 	        cv2.polylines(img, pupilArray, True, (0, 0, 255/(i+1)), int(breadthList[i/2] * 3/100))
 	    i += 1
+	else:
+	    print("\t\tNo pupils to mark")
         tend = datetime.now()
 	print("\t\t" + str(tend - tstart))
     else:
@@ -118,7 +156,7 @@ def markPupil(img, pupilData, breadthList, wait_at_frame):
 
 #Takes an image, detector and predictor and returns a list of lists of points and a list of hypotenuses
 def detectFrame(img, detector, predictor):
-    print("\t\tBeginning detection")
+    print("\tBeginning detection")
     tstart = datetime.now()
     detections = detector(img, 1)# type(detections) == dlib.rectangles
     tend = datetime.now()
@@ -128,6 +166,7 @@ def detectFrame(img, detector, predictor):
     breadthList = []
 
     if(len(detections) == 0):
+	print("\t\t(No detection)")
         ptsList.append([(-1,-1)]) #dummy detection for pupils
 	breadthList.append(0) #zero breadth for pupils
     else:
@@ -153,7 +192,7 @@ def detectFrame(img, detector, predictor):
 	
 	    breadthList.append(np.sqrt(d.width() ** 2 + d.height() ** 2)) #this is a list of magnitudes of the hypotenuse (so called breadth) of the face detection
 	    tend = datetime.now()
-	    print("\t\t" + str(tend - tstart))
+	    print("\t\t\t" + str(tend - tstart))
 
     return ptsList, breadthList
 
@@ -173,7 +212,7 @@ def getMetadata(input_path):
 
 #Returns a list of pupil data acquired using eyeLine, a modified version of Tristan Hume's eyeLike
 def getPupilData(input_path):
-    print("\t\tsubprocessing pupil data")
+    print("\tBeginning pupil subprocess")
     tstart = datetime.now()
     eyeLine = subprocess.Popen(["./eyeLine", "-d", input_path], stdout=subprocess.PIPE)
     eyeLine.wait()
@@ -196,25 +235,27 @@ def getPupilData(input_path):
     return pupilData
 
 #Does frame processing such as calling mark frame and mark pupil
-def handleFrame(input_path, detector, predictor, wait_at_frame):
+def handleFrame(input_path, detector, predictor, verbose, wait_at_frame):
     global lazy_output_file, global_script_start, glbJson, glbJsonFcount, glbJsonPcount
-    print("\tBase encoding time")
-    tstart = datetime.now()
 
+    tstart = datetime.now()
     if URI_Handling:
+	print("\tURI encoding time")
         content_file = open(fn, 'r')
         img = data_uri_to_cv2_img(content_file.read())
         content_file.close()
+        tend = datetime.now()
+        print("\t\t" + str(tend - tstart))
     else:
 	img = cv2.imread(input_path, 1)
-    tend = datetime.now()
-    print("\t" + str(tend - tstart))
 
     ptsList, breadthList = detectFrame(img, detector, predictor)
     glbJson['Landmarks ' + str(glbJsonFcount)] = ptsList
     glbJsonFcount += 1
 
-    markFrame(img, ptsList, breadthList, wait_at_frame)
+    pitchList, yawList, rollList = approximatePYR(ptsList, verbose)
+
+    markFrame(img, ptsList, breadthList, rollList, wait_at_frame)
 
     if not realTime:
         pupilData = getPupilData(input_path) #IPC to get pupil data
@@ -225,11 +266,63 @@ def handleFrame(input_path, detector, predictor, wait_at_frame):
 	
     cv2.imwrite((lazy_output_file if newCopy else input_path), img) 
     tend = datetime.now()
-    print("\ttime to write since encoding")
-    print("\t" + str(tend - tstart)) 
+    print("\t\t" + str(tend - tstart)) 
     return img #for the sake of the single frame option (needed metadata)
 
+def handleVideo(input_path, detector, predictor, verbose, wait_at_frame, start_time, duration, output_path, newCopy):
+    ("Gathering metadata")
+    tstart = datetime.now()
+	
+    metadata = getMetadata(input_path)
+    for d in metadata:
+        print(d)
+    glbJson['Meta'] = metadata
+
+    tend = datetime.now()
+    print("Finished gathering at " + str(tend - tstart) + "\n")
+
+    midPath = input_path[:input_path.rfind(".")] + "%d.png"
+    print("Breaking into frames")
+    tstart = datetime.now()
+    ffmpegBreak = subprocess.Popen(["ffmpeg", "-ss", start_time] + (["-t", duration] if duration != "-1" else []) + ["-i", input_path, "-y", midPath], stdout=outstream, stderr=subprocess.STDOUT) # Run FFMPEG, using pngs
+    ffmpegBreak.wait()
+    tend = datetime.now()
+    print("Finished breaking at " + str(tend - tstart) + "\n")
+
+    g = glob.glob(input_path[:input_path.rfind(".")] + "*.png")
+    for i, fn in enumerate(g):
+            print("Frame " + str(i) + ":")
+	    tstart = datetime.now()
+	    handleFrame(fn, detector, predictor, verbose, wait_at_frame)
+	    tend = datetime.now()
+	    print("\t" + str(tend - tstart))
+
+    if newCopy:
+        midPath = midPath[:midPath.rfind(".")] + "_final.png"
+        
+    print("Rebuilding video")
+    tstart = datetime.now()
+    ffmpegBuild = subprocess.Popen(["ffmpeg", "-i", midPath, "-y", output_path], stdout=outstream, stderr=subprocess.STDOUT)# Run FFMPEG to rebake the video
+    ffmpegBuild.wait()
+    tend = datetime.now()
+    print("Finished rebuilding at " + str(tend - tstart))
+    if newCopy:
+        for f in glob.glob(input_path[:input_path.rfind(".")] + "*_final.png"):
+            os.remove(f)
+    else:
+        for f in glob.glob(input_path[:input_path.rfind(".")] + "*.png"):
+            os.remove(f)
+    end = datetime.now()
+    with open("vProcessing.json", 'w') as outfile:
+	json.dump(glbJson, outfile)
+
+    #cur = conn.cursor()
+    #cur.execute("INSERT INTO user_videos(path, username) values('" + relative_path + "', '" + username + "');" )
+    #conn.commit()
+   
+
 if __name__ == "__main__":
+
     global_script_start = datetime.now()
 
     if len(sys.argv) < 2:
@@ -288,7 +381,7 @@ if __name__ == "__main__":
         print("Please enter an input file")
         exit(1)
 
-    conn = psycopg2.connect(dbname="postgres", user="postgres", password="student", host="localhost")
+    #conn = psycopg2.connect(dbname="postgres", user="postgres", password="student", host="localhost")
     
     
     print("Calling DLib")
@@ -301,61 +394,18 @@ if __name__ == "__main__":
     outstream = (None if verbose else open(os.devnull, 'w')) #for redirecting output to nothing as desired
 
     if single_frame:
-	print("Handling a frame")
+	print("\tHandling a frame")
 	tstart = datetime.now()
-	img = handleFrame(input_path, detector, predictor, wait_at_frame)
+	img = handleFrame(input_path, detector, predictor, verbose, wait_at_frame)
         print("Image " + input_path + ": Width - " + str(img.shape[0]) + ", Height - " + str(img.shape[1])) #write to DB?
 	tend = datetime.now()
 	print("Finished handling frame at" + str(tend - tstart))
-
-
     else:
-	("Gathering metadata")
+	print("Handling a video")
 	tstart = datetime.now()
-	
-	metadata = getMetadata(input_path)
-	for d in metadata:
-	    print(d)
-	glbJson['Meta'] = metadata
-
+	handleVideo(input_path, detector, predictor, verbose, wait_at_frame, start_time, duration, output_path, newCopy)
 	tend = datetime.now()
-	print("Finished gathering at " + str(tend - tstart))
+	print("Finished handling video at " + str(tend - tstart))
 
-        midPath = input_path[:input_path.rfind(".")] + "%d.png"
-	print("Breaking into frames")
-	tstart = datetime.now()
-        ffmpegBreak = subprocess.Popen(["ffmpeg", "-ss", start_time] + (["-t", duration] if duration != "-1" else []) + ["-i", input_path, midPath], stdout=outstream, stderr=subprocess.STDOUT) # Run FFMPEG, using pngs
-	ffmpegBreak.wait()
-	tend = datetime.now()
-	print("Finished breaking at " + str(tend - tstart))
-
-        g = glob.glob(input_path[:input_path.rfind(".")] + "*.png")
-        for i, fn in enumerate(g):
-                print("Handling frame " + str(i) + ":")
-		tstart = datetime.now()
-		handleFrame(fn, detector, predictor, wait_at_frame)
-		tend = datetime.now()
-		print("Finished handling frame " + str(tend - tstart))
-
-        if newCopy:
-            midPath = midPath[:midPath.rfind(".")] + "_final.png"
-        
-	print("Rebuilding video")
-	tstart = datetime.now()
-	ffmpegBuild = subprocess.Popen(["ffmpeg", "-i", midPath, output_path], stdout=outstream, stderr=subprocess.STDOUT)# Run FFMPEG to rebake the video
-        ffmpegBuild.wait()
-	tend = datetime.now()
-	print("Finished rebuilding at " + str(tend - tstart))
-	if newCopy:
-            for f in glob.glob(input_path[:input_path.rfind(".")] + "*_final.png"):
-                os.remove(f)
-        else:
-            for f in glob.glob(input_path[:input_path.rfind(".")] + "*.png"):
-                os.remove(f)
     end = datetime.now()
-    with open("vProcessing.json", 'w') as outfile:
-	json.dump(glbJson, outfile)
-    cur = conn.cursor()
-    cur.execute("INSERT INTO user_videos(path, username) values('" + relative_path + "', '" + username + "');" )
-    conn.commit()
-    print("Execution Complete at " + str(end - global_script_start))
+    print("Execution complete at " + str(end - global_script_start))
