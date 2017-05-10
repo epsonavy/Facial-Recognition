@@ -48,7 +48,7 @@ html {
 }
 
 body {
-  background: #9e9e9e;
+  background-image: url("../bg.jpg");
   font-family: 'Titillium Web', sans-serif;
 }
 a {
@@ -64,6 +64,7 @@ a:hover {
 .form2 {
   position: relative;
   z-index: 2;
+  opacity: .9;
   background: #000000;
   padding: 40px;
   max-width: 800px;

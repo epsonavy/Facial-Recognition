@@ -21,8 +21,8 @@ $(document).ready(function() {
 	$('#targetFile').bind('change', function() {
 
   		//this.files[0].size gets the size of your file.
-  		if (this.files[0].size > 20000000) {
-    		alert('Your file is bigger than 20MB!!!');
+  		if (this.files[0].size > 50000000) {
+    		alert('Your file is bigger than 50MB!!!');
         	// if more than permit amount, disable the upload button
         	$('#uploadMsg').html('Your file is too big!');
         	$('#uploadButton').prop('disabled', true);

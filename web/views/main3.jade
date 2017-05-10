@@ -1,0 +1,80 @@
+doctype html
+html
+  head
+    title Welcome
+    link(href='http://fonts.googleapis.com/css?family=Titillium+Web:400,300,600', rel='stylesheet', type='text/css')
+    link(rel='stylesheet', href='/css/style.css')
+    link(rel='stylesheet', href='/css/style2.css')
+    link(rel='stylesheet', href='//vjs.zencdn.net/5.11/video-js.min.css')
+    script(src='//vjs.zencdn.net/5.11/video.min.js')
+    script(src='https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js')
+    script(src='/js/lib/binary.js')
+    script(src='/js/lib/common.js')
+    script(src='/js/lib/video.js')
+    script(src='/js/update.js')
+
+  body
+  .form2
+      h1.title Welcome #{first_name} #{last_name}
+      .profile
+        h2 
+          u User Information
+        table
+          tr
+            td(class='lighter') Username
+            td #{username}
+          tr
+            td(class='lighter') Last Login
+            td #{last_login_time}
+          tr
+            td(class='lighter') IP address
+            td #{last_login_ip}
+        h2 
+          u Control Panel
+      .center-area
+        fieldset
+          legend Upload Facial Video
+          aside(id='select-box')
+            form(action='/upload', enctype='multipart/form-data', method='post')
+              input(id='targetFile', name='upload', type='file', multiple='multiple', accept='video/*;capture=camcorder')
+              input(type='hidden', name='username', value='#{username}')
+              p(id='uploadMsg') Size Limit: 20MB
+              button(id='uploadButton', type='submit', class='button button-block') Upload
+        fieldset
+          legend My Videos Folder
+          nav(id='list')
+            form(action='/videos', method='get')
+              ul
+                if files
+                  each file in files
+                    li
+                      a(href=file)=file 
+                      &nbsp;
+                      button(id='deleteThis', name='filename', value=file type='submit') X
+                else
+                  h1 No videos exist
+        fieldset
+          legend Video Player
+          video(id='my-player', class='video-js', controls='true', data-setup='{}')
+            | <source src="//vjs.zencdn.net/v/oceans.mp4">
+            p(class='vjs-no-js') To view this video please enable JavaScript, and consider upgrading to a web browser that
+              a(href='http://videojs.com/html5-video-support/' target='_blank') supports HTML5 video
+        fieldset
+          legend Extra Feature - Beta
+          a(href='https://54.67.28.176/camtest/demos/camtest.html' target='_blank') Realtime on Webcam
+      .tab-content
+        form(action='/logout', method='post')
+          button(type='submit', class='button button-block') Log Out 
+
+
+
+
+
+
+
+
+
+
+
+
+
