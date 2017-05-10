@@ -84,7 +84,7 @@ def findPitch(pts, verbose):
 	chinMag = (leftChinMag + rightChinMag) / 2
 
 	pitch = chinMag / edgeMag #similar (near 1) means level, large ratio means large pitch, unfortunately relative only
-	pitch += 180 / np.pi #pretend this is degrees
+	pitch *= 180 / np.pi #pretend this is degrees
 	return pitch
 
 def findYaw(pts, verbose):
@@ -312,85 +312,8 @@ def getPupilData(input_path):
 	return pupilData
 
 #Does frame processing such as calling mark frame and mark pupil
-def handleFrame(input_path, detector, predictor, verbose, wait_at_frame, output_path):
+def handleFrame(input_path, detector, predictor, verbose, wait_at_frame, newCopy):
 	global global_script_start, glbJson, glbJsonFcount, glbJsonPcount
-
-<<<<<<< HEAD
-# main, handles args, potential arguments are: --help (displays help), -uri (enables uri handling), -l (newcopy), -r (realtime), 
-# -p (predictor), -f (single frame)
-# -ss (start time), -t (duration), -i (input path), -o (output path)
-if __name__ == "__main__":
-    global_script_start = datetime.now()
-
-    if len(sys.argv) < 2:
-        print("Error: Too few arguments supplied.")
-        exit()
-
-    elif len(sys.argv) > 14:
-        print("Error: Too many arguments supplied.")
-        exit()
-
-    run_dir = os.path.dirname(os.path.abspath(inspect.stack()[0][1]))
-    predictor_path = run_dir + "/shape_predictor_68_face_landmarks.dat"
-    newCopy = True
-    realTime = False
-    single_frame = False
-    start_time = "00:00"
-    duration = "-1"
-    input_path = ""
-    output_path = ""
-    verbose = False
-    wait_at_frame = False
-
-    if sys.argv[1] == "--help" or sys.argv[1] == "-h":
-        displayHelp()
-        exit()
-
-    for index, arg in enumerate(sys.argv):
-        if arg == "-uri":
-	    URI_Handling = True 
-	elif arg == "-l":
-            newCopy = False
-	elif arg == "-r":
-	    realTime = True
-        elif arg == "-p":
-            predictor_path = sys.argv[index+1]
-        elif arg == "-f":
-            single_frame = True
-        elif arg == "-ss":
-            start_time = sys.argv[index+1]
-        elif arg == "-t":
-            duration = sys.argv[index+1]
-        elif arg == "-i":
-            input_path = sys.argv[index+1]
-            if output_path == "":
-                output_path = input_path[:input_path.rfind(".")] + "_final.mp4"
-        elif arg == "-o":
-            output_path = sys.argv[index+1]
-	    lazy_output_file = output_path
-	    print("Output path is now" + lazy_output_file)
-        elif arg == "-v":
-            verbose = True
-        elif arg == "-w":
-            wait_at_frame = True
-
-    if input_path == "":
-        print("Please enter an input file")
-        exit()
-
-    print("Calling DLib")
-    tpeter = datetime.now()
-    detector = dlib.get_frontal_face_detector()
-    predictor = dlib.shape_predictor(predictor_path)
-    tgay = datetime.now()
-    print("Finished calling at " + str(tgay - tpeter)) #WTF
-
-    outstream = (None if verbose else open(os.devnull, 'w')) #for redirecting output to nothing as desired
-
-    if single_frame:
-	print("Handling a frame")
-=======
->>>>>>> 3ebb81a35e13ed6e15f175c0664474bab5bd233e
 	tstart = datetime.now()
 	if URI_Handling:
 		print("\tURI encoding time")
@@ -417,7 +340,7 @@ if __name__ == "__main__":
 
 		markPupil(img, pupilData, breadthList, wait_at_frame)
 
-	cv2.imwrite((output_path if newCopy else input_path), img) 
+	cv2.imwrite(((input_path[:input_path.rfind(".")] + "_final.png") if newCopy else input_path), img) 
 	tend = datetime.now()
 	print("\t\t" + str(tend - tstart)) 
 	return img #for the sake of the single frame option (needed metadata)
@@ -446,7 +369,7 @@ def handleVideo(input_path, detector, predictor, verbose, wait_at_frame, start_t
 	for i, fn in enumerate(g):
 		print("Frame " + str(i) + ":")
 		tstart = datetime.now()
-		handleFrame(fn, detector, predictor, verbose, wait_at_frame, output_path)
+		handleFrame(fn, detector, predictor, verbose, wait_at_frame, newCopy)
 	tend = datetime.now()
 	print("\t" + str(tend - tstart))
 
@@ -473,6 +396,9 @@ def handleVideo(input_path, detector, predictor, verbose, wait_at_frame, start_t
 	#cur.execute("INSERT INTO user_videos(path, username) values('" + relative_path + "', '" + username + "');" )
 	#conn.commit()
 
+# main, handles args, potential arguments are: --help (displays help), -uri (enables uri handling), -l (newcopy), -r (realtime), 
+# -p (predictor), -f (single frame)
+# -ss (start time), -t (duration), -i (input path), -o (output path)
 if __name__ == "__main__":
 
 	global_script_start = datetime.now()
@@ -544,7 +470,7 @@ if __name__ == "__main__":
 
 	if single_frame:
 		print("")
-		img = handleFrame(input_path, detector, predictor, verbose, wait_at_frame, output_path)
+		img = handleFrame(input_path, detector, predictor, verbose, wait_at_frame, newCopy)
 		print("Image " + input_path + ": Width - " + str(img.shape[0]) + ", Height - " + str(img.shape[1])) #write to DB?
 	else:
 		print("")
