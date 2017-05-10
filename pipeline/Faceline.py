@@ -199,6 +199,9 @@ def handleFrame(input_path, detector, predictor, wait_at_frame):
     print("\t" + str(tend - tstart)) 
     return img #for the sake of the single frame option (needed metadata)
 
+# main, handles args, potential arguments are: --help (displays help), -uri (enables uri handling), -l (newcopy), -r (realtime), 
+# -p (predictor), -f (single frame)
+# -ss (start time), -t (duration), -i (input path), -o (output path)
 if __name__ == "__main__":
     global_script_start = datetime.now()
 

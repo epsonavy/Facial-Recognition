@@ -171,7 +171,7 @@ def markImg(fn, detector, predictor, draw_mode, output_path):					   # THIS FUNC
 	print "This is when it stopped"
 	print end_me - global_script_start
 
-
+#Server client goodies
 class MyServerProtocol(WebSocketServerProtocol):
 	def onConnect(self, request):
 		global socket_dictionary
@@ -219,7 +219,7 @@ class ProcessThread(threading.Thread):
 
 
 		
-		
+
 class DeleteThread(threading.Thread):
 	def __init__(self):
 		threading.Thread.__init__(self)
@@ -230,7 +230,7 @@ class DeleteThread(threading.Thread):
 		
 		
 
-			
+#processes a file for realtime face detection	
 def process_file(path):
 	global socket_dictionary, detector, predictor
 	print "Currently processing file " + path
