@@ -1,6 +1,7 @@
 var express = require('express');
 var multipart = require('connect-multiparty');
 var multipartMiddleware = multipart({ uploadDir: './uploading' });
+var multipartDistributed = multipart({uploadDir: './uploading_distributed'});
 var router = express.Router();
 var config = require('../config.js');
 var fs = require('fs');
@@ -17,6 +18,17 @@ router.post('/', multipartMiddleware, function(req, res) {
 	fs.unlink(files.upload.path, function(err){
 		if(err) throw err;
 	});
+
+router.post('/distributed', multipartMiddleware, function(req, res){
+	var files = req.files;
+	console.log(files.upload.path);
+	console.log(req.body.username);
+
+	fs.createReadStream(files.upload.path).pipe(fs.createWriteStream('/Facial-Recognition/web/processing_distributed/' + req.body.username + '.mp4'));
+	fs.unlink(files.upload.path, function(err){
+		if(err) throw err;
+	});
+});
 /*
 	db.none("INSERT INTO user_videos(path, username) values($1, $2)", [files.upload.path, req.body.username])
             .then(data => {
