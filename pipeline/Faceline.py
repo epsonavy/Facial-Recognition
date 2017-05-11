@@ -140,8 +140,8 @@ def findRoll(pts, verbose):
 		print("\t\t\tNose bridge is " + str(noseBridge))
 		print("\t\t\tLeft diagonal is " + str(leftDiag))
 		print("\t\t\tRight diagonal is " + str(rightDiag))
-		print("\t\t\tLeft angle is " + str(leftDegs) + " Degs, " + str(leftRads) + " Rads")
-		print("\t\t\tRight angle is " + str(rightDegs) + "Degs, " + str(rightRads) + " Rads")
+		print("\t\t\tLeft angle is " + str(leftRads) + " Rads")
+		print("\t\t\tRight angle is "+ str(rightRads) + " Rads")
 		print("\t\t\tRoll is " + str(roll))
 
 	return roll
