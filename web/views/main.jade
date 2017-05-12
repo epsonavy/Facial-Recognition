@@ -36,7 +36,8 @@ html
           legend Upload Facial Video
           aside(id='select-box')
             form(action='/upload', enctype='multipart/form-data', method='post')
-              input(id='targetFile', name='upload', type='file', multiple='multiple', accept='video/*;capture=camcorder')
+              div(id="my_file") Choose Video
+                input(id='targetFile', class="hide_file", name='upload', type='file', multiple='multiple', accept='video/*;capture=camcorder')
               input(type='hidden', name='username', value='#{username}')
               p(id='uploadMsg') Size Limit: 20MB
               button(id='uploadButton', type='submit', class='button button-block') Upload

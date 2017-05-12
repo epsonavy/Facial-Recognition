@@ -1,5 +1,5 @@
 $(document).ready(function() {
-
+	$('#uploadButton').hide();
 	var $selected = "";
 	$('#list a').click(function(event) { 
     	event.preventDefault(); 
