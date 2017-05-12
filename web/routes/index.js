@@ -255,4 +255,13 @@ router.get('/videos', (req, res, next) => {
 	res.redirect('/dashboard');
 });
 
+// Mobile user router to video player
+router.get('/*.(mov|MOV|mp4|MP4)', function (req, res) {
+	res.render('videoplayer', {
+               "url": req.url 
+	});
+
+})
+
+
 module.exports = router;

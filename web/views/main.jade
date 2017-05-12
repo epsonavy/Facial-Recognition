@@ -41,7 +41,7 @@ html
               input(type='hidden', name='username', value='#{username}')
               p(id='uploadMsg') Size Limit: 20MB
               button(id='uploadButton', type='submit', class='button button-block') Upload
-        fieldset
+        fieldset(id='normal')
           legend My Videos Folder
           nav(id='list')
             form(action='/videos', method='get')

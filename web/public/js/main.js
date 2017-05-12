@@ -9,6 +9,7 @@ $(document).ready(function () {
     $box      = $('#upload-box');
     $progress = $('#progress');
     $list     = $('#list');
+	$list_m   = $('#list_mobile');
 
     $video.attr({
         controls : true,
