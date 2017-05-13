@@ -263,5 +263,18 @@ router.get('/*.(mov|MOV|mp4|MP4)', function (req, res) {
 
 })
 
+// Check new file update
+router.get('/checkUpdate', (req, res, next) => {
+  db.any("SELECT count(*) FROM user_videos WHERE username=$1", [req.query.username])
+    .then(data => {
+      res.json(data);
+    })
+    .catch(error => {
+        // error;
+        console.error(error);
+    });
+	
+     //res.send(JSON.stringify({key:new Date()}));
+});
 
 module.exports = router;

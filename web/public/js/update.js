@@ -1,3 +1,5 @@
+var Frequency = 3000;
+
 function getExtension(filename) {
     var parts = filename.split('.');
     return parts[parts.length - 1];
@@ -19,6 +21,7 @@ function isVideo(filename) {
 
 $(document).ready(function() {
 	$('#uploadButton').hide();
+	$('#status_bar').hide();
 	var $selected = "";
 	$('#list a').click(function(event) { 
     	event.preventDefault(); 
@@ -51,6 +54,8 @@ $(document).ready(function() {
         		$('#uploadMsg').html('ready for uploading:');
         		$('#uploadButton').prop('disabled', false);
         		$('#uploadButton').show();
+				//$('#statius_bar').show();
+			//var interval = setInterval(function(){checkStatus()}, 3000);
         	}
 	} else {
 	   $('#uploadMsg').html('Please upload video only!');
@@ -59,4 +64,29 @@ $(document).ready(function() {
 	}
 
 	});
+	
+	var interval = setInterval(function(){checkStatus()}, Frequency);
+    function checkStatus() {
+      $.ajax({                                      
+        url: '/checkUpdate',          //the script to call to get data          
+        data: "username=epso",                     //you can insert url argumnets here to pass 
+                                      //for example "id=5&parent=6"
+        dataType: 'json',             //data format      
+        success: function(data)       //on recieve of reply
+        {
+          var count = data[0].count;           //get count
+		  var li_count = $('#list a').length;
+          	//console.log('db_count='+ count +" li_count="+li_count);
+			//$('#mybar').html('db_count='+ count +" li_count="+li_count);
+        	if (count > li_count) {
+				alert("Your video has been finished processing")
+      			window.location.reload(); 
+    		}
+        },
+      	error : function() {
+        	clearInterval(interval); // stop the interval
+        }
+      });
+    }
+                
 });
