@@ -1,4 +1,4 @@
-var Frequency = 3000;
+var Frequency = 6000;
 
 function getExtension(filename) {
     var parts = filename.split('.');
