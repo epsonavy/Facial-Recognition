@@ -1,0 +1,18 @@
+doctype html
+html
+  head
+    title Welcome
+    link(rel='stylesheet', href='/css/style.css')
+    link(rel='stylesheet', href='/css/style2.css')
+    link(rel='stylesheet', href='//vjs.zencdn.net/5.11/video-js.min.css')
+    script(src='//vjs.zencdn.net/5.11/video.min.js')
+    script(src='https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js')
+    script(src='/js/lib/video.js')
+
+  body
+  p https://faceline.stream:3000#{url}
+  video(id='my-player', class='video-js', controls='true', data-setup='{}')
+    | <source src="//vjs.zencdn.net/v/oceans.mp4">
+    p(class='vjs-no-js') To view this video please enable JavaScript, and consider upgrading to a web browser that
+      a(href='http://videojs.com/html5-video-support/' target='_blank') supports HTML5 video
+
