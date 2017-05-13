@@ -103,7 +103,12 @@ class DeleteThread(threading.Thread):
 		#os.unlink
 		1
 		
-		
+# remove status file
+def removeStatus(username):
+    try:
+        os.remove("status/" + username + ".status")
+    except OSError:
+        pass
 
 			
 def process_file(path):
@@ -132,7 +137,7 @@ def process_file(path):
 	os.unlink(path)
 	print "Inserted video into database. Now ready to view"
 	#Write into database now
-
+	removeStatus(username)
 
 	
 for x in range(0, 2):
