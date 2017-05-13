@@ -9,11 +9,28 @@ var db = require('./db.js');
 //var Upload = require('../models/upload.js');
 
 router.post('/', multipartMiddleware, function(req, res) {
+    function mkdir(dir) {   
+        if (!fs.existsSync(dir)){
+            fs.mkdirSync(dir);
+        }
+    }
+    var dir = "";
 	var files = req.files;
-	//console.log(files);
-	console.log(files.upload.path);
-	console.log(req.body.username);
+	//console.log(files.upload.path);
+	//console.log(req.body.username);
+    dir = "/Facial-Recognition/web/processing";
+    mkdir(dir);
+    dir = "/Facial-Recognition/web/uploading";
+    mkdir(dir);
+	dir = '/Facial-Recognition/web/status';
+    mkdir(dir);
+	var log_file = dir + '/' + req.body.username + '.status';	
 
+    fs.appendFile(log_file, 'Start processing...\n', (err) => {
+		if (err) throw err;
+  		console.log('Start processing...');
+	});
+	
 	fs.createReadStream(files.upload.path).pipe(fs.createWriteStream('/Facial-Recognition/web/processing/' + req.body.username + '.mp4'));
 	fs.unlink(files.upload.path, function(err){
 		if(err) throw err;
