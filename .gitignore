@@ -1,3 +1,6 @@
 # ignore mp4 files
 ####################
 /web/public/videos/*.mp4
+
+# ignore vProcessing.json
+/web/vProcessing.json
