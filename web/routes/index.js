@@ -265,9 +265,37 @@ router.get('/*.(mov|MOV|mp4|MP4)', function (req, res) {
 
 // Check new file update
 router.get('/checkUpdate', (req, res, next) => {
-  db.any("SELECT count(*) FROM user_videos WHERE username=$1", [req.query.username])
+
+  var name = req.query.username; 
+  var statusFile = '/Facial-Recognition/web/status/' + name + '.status';
+  db.any("SELECT count(*) FROM user_videos WHERE username=$1", [name])
     .then(data => {
-      res.json(data);
+
+	function checkIfFile(file, cb) {
+ 	 fs.stat(file, function fsStat(err, stats) {
+    	if (err) {
+      	if (err.code === 'ENOENT') {
+        	return cb(null, false);
+      	} else {
+        	return cb(err);
+     	 }
+    	}
+    	return cb(null, stats.isFile());
+  	});
+	}
+
+		checkIfFile(statusFile, function(err, isFile) {
+			if (isFile) {
+			fs.readFile(statusFile, function (err, context) { 
+	  			if (err) throw err;
+				var ary = context.toString().split('\n');
+	    		var lastline = ary[ary.length-2];	
+			    console.log(data[0].count);
+				res.send(JSON.stringify({msg:lastline, count:data[0].count}));
+			}); 
+			} 
+		});
+      //res.json(data);
     })
     .catch(error => {
         // error;
