@@ -16,7 +16,8 @@ router.get('/dashboard', (req, res, next) => {
     db.tx(t=> {
         return t.batch([
             t.one("SELECT username, password, first_name, last_name, last_login_time, last_login_ip FROM userdata WHERE username=$1 and password=$2", [req.session.user.username, req.session.user.password]),
-            t.any("SELECT path FROM user_videos WHERE username=($1)", [req.session.user.username])
+            t.any("SELECT path FROM user_videos WHERE username=($1)", [req.session.user.username]),
+        	t.none("UPDATE userdata SET last_login_time=now()::timestamp, last_login_ip=($1) WHERE username=($2)", [req.session.user.last_login_ip, req.session.user.username])
         ]);
     }).then(data => {
     	console.log(data[1]);
@@ -72,8 +73,8 @@ router.post('/api/login', (req, res, next) => {
 
     db.tx(t=> {
         return t.batch([
-            t.one("SELECT username, password, first_name, last_name, last_login_time, last_login_ip FROM userdata WHERE username=$1 and password=$2", [reqData.username, reqData.password]),
-            t.none("UPDATE userdata SET last_login_time=now()::timestamp, last_login_ip=($1) WHERE username=($2)", [reqData.last_login_ip, reqData.username])
+            t.one("SELECT username, password, first_name, last_name, last_login_time, last_login_ip FROM userdata WHERE username=$1 and password=$2", [reqData.username, reqData.password])//,
+            //t.none("UPDATE userdata SET last_login_time=now()::timestamp, last_login_ip=($1) WHERE username=($2)", [reqData.last_login_ip, reqData.username])
         ]);
       })
       .then(data=> {
