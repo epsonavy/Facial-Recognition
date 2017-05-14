@@ -69,7 +69,7 @@ $(document).ready(function() {
     function checkStatus() {
       $.ajax({                                      
         url: '/checkUpdate',          //the script to call to get data          
-        data: "username=epso",                     //you can insert url argumnets here to pass 
+        data: "username=" + $('#nameTag').text(),                     //you can insert url argumnets here to pass 
                                       //for example "id=5&parent=6"
         dataType: 'json',             //data format      
         success: function(data)       //on recieve of reply
