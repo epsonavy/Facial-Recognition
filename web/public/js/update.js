@@ -74,7 +74,7 @@ $(document).ready(function() {
         dataType: 'json',             //data format      
         success: function(data)       //on recieve of reply
         {	
-          var count = data.count;           //get count
+          var count = parseInt(data.count);           //get count
 		  var li_count = $('#list a').length;
           	//console.log('db_count='+ count +" li_count="+li_count);
 			$('#mybar').html(data.msg);

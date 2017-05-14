@@ -293,6 +293,8 @@ router.get('/checkUpdate', (req, res, next) => {
 			    console.log(data[0].count);
 				res.send(JSON.stringify({msg:lastline, count:data[0].count}));
 			}); 
+			} else {
+				res.send(JSON.stringify({count:data[0].count}));
 			} 
 		});
       //res.json(data);
