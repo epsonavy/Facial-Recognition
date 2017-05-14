@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const moment = require('moment');
 var db = require('./db.js');
 var fs = require('fs');
 
@@ -24,11 +25,13 @@ router.get('/dashboard', (req, res, next) => {
         	var tmp = data[1][i].path.split("/");
         	myFiles.push(tmp[tmp.length - 1]);
 		}
+		var myTime = data[0].last_login_time;
+		var USTime = (moment.unix(myTime/1000).subtract(7, 'hours').format('dddd, MMMM Do YYYY, h:mm a'));
         res.render('main', {
               "username": data[0].username, 
               "first_name": data[0].first_name, 
               "last_name": data[0].last_name, 
-              "last_login_time": data[0].last_login_time, 
+              "last_login_time": USTime, 
               "last_login_ip": data[0].last_login_ip,
         	  files : myFiles
             });
