@@ -77,7 +77,9 @@ $(document).ready(function() {
           var count = parseInt(data.count);           //get count
 		  var li_count = $('#list a').length;
           	//console.log('db_count='+ count +" li_count="+li_count);
-			$('#mybar').html(data.msg);
+			if(data.msg) {
+				$('#mybar').html("<img src='../loading.gif' alt='loading' height='15' width='15'> " + data.msg);
+			}
         	if (count > li_count) {
 				alert("Your video has been finished processing")
       			window.location.reload(); 
