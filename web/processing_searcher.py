@@ -130,8 +130,10 @@ def process_file(path):
 
 	Popen(['python', '../pipeline/Faceline.py', '-l', '-i', '/Facial-Recognition/web/processing/' + true_filename, '-o', output_path, '-v']).wait()
 	print "python ../pipeline/Faceline.py -l -i /Facial-Recognition/web/processing/" + true_filename + " -o " + output_path + " -v"
+	with open('vProcessing.json', 'r') as myfile:
+		data = myfile.read().replace('\n', '')
 	cur = conn.cursor()
-	cur.execute("INSERT INTO user_videos(path, username) values('" + relative_path + "', '" + username + "');" )
+	cur.execute("INSERT INTO user_videos(path, username, v_processing) values('" + relative_path + "', '" + username + "', '" + data + "');" )
 	conn.commit()
 	print "INSERT INTO user_videos(path, username) values('" + relative_path + "', '" + username + "');"
 	os.unlink(path)

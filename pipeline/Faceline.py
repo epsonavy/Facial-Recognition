@@ -400,10 +400,6 @@ def handleVideo(input_path, detector, predictor, verbose, wait_at_frame, start_t
     with open("vProcessing.json", 'w') as outfile:
         json.dump(glbJson, outfile)
 
-    #cur = conn.cursor()
-    #cur.execute("INSERT INTO user_videos(path, username) values('" + relative_path + "', '" + username + "');" )
-    #conn.commit()
-
 # output status to file
 def writeStatus(username, str):
     with open("../web/status/" + username + ".status", 'a') as myfile:
