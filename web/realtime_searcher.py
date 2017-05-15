@@ -22,6 +22,7 @@ request_semaphore = threading.Semaphore(0)
 
 contextFactory = ssl.DefaultOpenSSLContextFactory('/etc/nginx/ssl/nginx.key', '/etc/nginx/ssl/nginx.crt')
 
+#Defines the server protocol for socket connection
 class MyServerProtocol(WebSocketServerProtocol):
 	def onConnect(self, request):
 		global socket_dictionary
@@ -43,7 +44,7 @@ class MyServerProtocol(WebSocketServerProtocol):
 			print "Error ocurred: " + str(e)
 			pass
 
-
+#executes a processing thread
 class ProcessThread(threading.Thread):
 	def __init__(self, threadID):
 		threading.Thread.__init__(self)
@@ -58,7 +59,7 @@ class ProcessThread(threading.Thread):
 				process_file(path)
 				print "Thread #" + str(self.threadID) + " is finished processing."
 
-
+#accepts a thread and binds it to an ip and socket
 class AcceptThread(threading.Thread):
 	def __init__(self):
 		threading.Thread.__init__(self)
@@ -81,6 +82,7 @@ class AcceptThread(threading.Thread):
 			readThread.start()
 			print "Socket is connected!"
 
+#Reads a given thread
 class ReadThread(threading.Thread):
 	def __init__(self, socket):
 		threading.Thread.__init__(self)
@@ -88,7 +90,7 @@ class ReadThread(threading.Thread):
 	def run(self):
 		1
 
-		
+#Deletes a thread
 class DeleteThread(threading.Thread):
 	def __init__(self):
 		threading.Thread.__init__(self)
@@ -96,10 +98,10 @@ class DeleteThread(threading.Thread):
 		# Need to implement a list with -tr to get the oldest image and unlink it
 		#os.unlink
 		1
-		
-		
 
-			
+
+
+#Runs FacelineRealtime.py to process the video
 def process_file(path):
 	global socket_dictionary
 	print "Currently processing file " + path
@@ -125,7 +127,8 @@ def add_file(path):
 	global file_queue, request_semaphore
 	file_queue.append(path)
 	request_semaphore.release()
-	
+
+#starts processing threads
 for x in range(0, 2):
 	processThread = ProcessThread(x)
 	processThread.start()
@@ -136,6 +139,7 @@ deleteThread.start()
 
 factory = WebSocketServerFactory(u"wss://0.0.0.0:6654")
 
+#creates a thread and starts it
 class FactoryThread(threading.Thread):
 	def __init__(self):
 		threading.Thread.__init__(self)
@@ -148,7 +152,7 @@ class FactoryThread(threading.Thread):
 factoryThread = FactoryThread()
 factoryThread.start()
 
-
+#finds images to process with realtime processing.
 while active:
 	for root, subFolders, files in os.walk('./realtime'):
 		for file in files:

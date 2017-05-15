@@ -6,6 +6,7 @@ from autobahn.twisted.websocket import WebSocketServerProtocol
 from autobahn.twisted.websocket import WebSocketServerFactory
 
 socket_dictionary = {}
+#Class for socket testing.
 class MyServerProtocol(WebSocketServerProtocol):
 	def onConnect(self, request):
 		global socket_dictionary

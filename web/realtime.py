@@ -51,6 +51,7 @@ Eye tracking
 
 lazy_output_file = None
 global_script_start = datetime.now()
+#Displays the help menu
 def displayHelp():
 
 	print(" Available Arguments\tDefault Arguments")
@@ -76,17 +77,19 @@ def displayHelp():
 	print(" Sample shell input:\t\t\tpython Faceline.py -ss 00:30 -t 00:02 -i /home/hew/desktop/F/Fash.divx")
 
 
-
+#Checks for point p in rectangle r
 def in_rect(r, p):
 
 	return p[0] > r[0] and p[1] > r[1] and p[0] < r[2] and p[1] < r[3] 
 
+#gets CV2 image from URI
 def data_uri_to_cv2_img(uri):
 	encoded_data = uri.split(',')[1]
 	nparr = np.fromstring(encoded_data.decode('base64'), np.uint8)
 	img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 	return img
 
+#Marks images with 68 points, lines and pupil tracking
 def markImg(fn, detector, predictor, draw_mode, output_path):					   # THIS FUNCTION MUTATES FILES
 	global lazy_output_file, global_script_start
 	print "Base encoding time"
@@ -171,7 +174,7 @@ def markImg(fn, detector, predictor, draw_mode, output_path):					   # THIS FUNC
 	print "This is when it stopped"
 	print end_me - global_script_start
 
-#Server client goodies
+#Server client protocol defines functions for connection, closing, sending a message and sending an image.
 class MyServerProtocol(WebSocketServerProtocol):
 	def onConnect(self, request):
 		global socket_dictionary
@@ -205,7 +208,7 @@ class MyServerProtocol(WebSocketServerProtocol):
 			print "Error ocurred: " + str(e)
 			pass
 
-
+#Spawn a thread and put it in the queue
 class ProcessThread(threading.Thread):
 	def __init__(self, threadID):
 		threading.Thread.__init__(self)
@@ -222,7 +225,7 @@ class ProcessThread(threading.Thread):
 
 
 		
-
+#Deletes a thread passed in thread
 class DeleteThread(threading.Thread):
 	def __init__(self):
 		threading.Thread.__init__(self)
@@ -257,11 +260,13 @@ def process_file(path):
 	print "File should be moved to " + nginx_system_path
 	return nginx_path	
 
+#Adds a file path to be processed
 def add_file(path):
 	global file_queue, request_semaphore
 	file_queue.append(path)
 	request_semaphore.release()
-	
+
+#Spawns threads for processing
 for x in range(0, 2):
 	processThread = ProcessThread(x)
 	processThread.start()

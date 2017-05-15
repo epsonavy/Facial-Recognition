@@ -21,7 +21,7 @@ import numpy as np  # For array handling
 import psycopg2
 
 
-
+# Initialization of connection to database, and thread information
 conn = psycopg2.connect("dbname='postgres' user='postgres' host='localhost' password='student'")
 
 file_queue = deque()
@@ -41,6 +41,8 @@ Eye tracking
 
 lazy_output_file = None
 global_script_start = datetime.now()
+
+#displays the help menu
 def displayHelp():
 
 	print(" Available Arguments\tDefault Arguments")
@@ -66,18 +68,19 @@ def displayHelp():
 	print(" Sample shell input:\t\t\tpython Faceline.py -ss 00:30 -t 00:02 -i /home/hew/desktop/F/Fash.divx")
 
 
-
+#Checks to see if point is in rectangle
 def in_rect(r, p):
 
 	return p[0] > r[0] and p[1] > r[1] and p[0] < r[2] and p[1] < r[3] 
 
+#uses URI to get image
 def data_uri_to_cv2_img(uri):
 	encoded_data = uri.split(',')[1]
 	nparr = np.fromstring(encoded_data.decode('base64'), np.uint8)
 	img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 	return img
 
-
+#runs a thread
 class ProcessThread(threading.Thread):
 	def __init__(self, threadID):
 		threading.Thread.__init__(self)
@@ -90,11 +93,9 @@ class ProcessThread(threading.Thread):
 				path = file_queue.pop()
 				print "Thread #" + str(self.threadID) + " is now processing " + path
 				process_file(path)
-				print "Thread #" + str(self.threadID) + " is finished processing."
+				print "Thread #" + str(self.threadID) + " is finished processing.
 
-
-		
-		
+#Deletes a thread that is passed in
 class DeleteThread(threading.Thread):
 	def __init__(self):
 		threading.Thread.__init__(self)
@@ -110,7 +111,7 @@ def removeStatus(username):
     except OSError:
         pass
 
-			
+# Processes a given file using Faceline.py
 def process_file(path):
 	global socket_dictionary, detector, predictor, count, conn
 	#os.system("python ../pipeline/Faceline_Realtime.py -f -i " + path + " -o " + nginx_system_path)
@@ -128,6 +129,7 @@ def process_file(path):
 	print "-i " + path
 	print "-o " + output_path
 
+	#Open Faceline.py and pass in file to be processed
 	Popen(['python', '../pipeline/Faceline.py', '-l', '-i', '/Facial-Recognition/web/processing/' + true_filename, '-o', output_path, '-v']).wait()
 	print "python ../pipeline/Faceline.py -l -i /Facial-Recognition/web/processing/" + true_filename + " -o " + output_path + " -v"
 	with open('vProcessing.json', 'r') as myfile:
@@ -141,12 +143,13 @@ def process_file(path):
 	#Write into database now
 	removeStatus(username)
 
-	
+#Runs threads
 for x in range(0, 2):
 	processThread = ProcessThread(x)
 	processThread.start()
 	process_threads.append(processThread)
-	
+
+#updates list of mp4 files in directory ./processing
 while active:
 	for root, dirnames, filenames in os.walk('./processing'):
 		for filename in filenames:

@@ -22,6 +22,7 @@ request_semaphore = threading.Semaphore(0)
 
 contextFactory = ssl.DefaultOpenSSLContextFactory('/etc/nginx/ssl/nginx.key', '/etc/nginx/ssl/nginx.crt')
 
+#Server client protocol defines functions for connection, closing, sending a message and sending an image.
 class MyServerProtocol(WebSocketServerProtocol):
 	def onConnect(self, request):
 		global socket_dictionary
@@ -52,7 +53,7 @@ class MyServerProtocol(WebSocketServerProtocol):
 			print "Error ocurred: " + str(e)
 			pass
 
-
+#Spawn a thread and put it in the queue
 class ProcessThread(threading.Thread):
 	def __init__(self, threadID):
 		threading.Thread.__init__(self)
@@ -77,10 +78,8 @@ class DeleteThread(threading.Thread):
 		# Need to implement a list with -tr to get the oldest image and unlink it
 		#os.unlink
 		1
-		
-		
 
-			
+	# processes a file for realtime face detection
 def process_file(path):
 	global socket_dictionary
 	print "Currently processing file " + path
@@ -104,11 +103,13 @@ def process_file(path):
 	print "File should be moved to " + nginx_system_path
 	return nginx_path	
 
+#adds a file to the file queue
 def add_file(path):
 	global file_queue, request_semaphore
 	file_queue.append(path)
 	request_semaphore.release()
-	
+
+#processes a thread
 for x in range(0, 2):
 	processThread = ProcessThread(x)
 	processThread.start()

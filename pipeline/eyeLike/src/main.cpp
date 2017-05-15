@@ -33,16 +33,26 @@ int main( int argc, const char** argv ) {
 	std::vector<std::string>::iterator argi;
 
 	//Load the cascades
+
+	/* This is where the Matt-eh-magic occurs, we read in haarcascades and load in face frames from an external source*/
 	cv::String face_cascade_name;
-	if(args[1].compare("-h") == 0){std::cout << std::endl << "Takes a series of pngs from stdin  and returns the coordinates of pupils detected in a human face." << std::endl << "The first argument is the filepath to cascade file (xml) and the following are are number of pngs" << std::endl << std::endl << "Sample use:" << std::endl << "eyeLine ./haarcascade_frontalface_alt.xml ./Matt.png ./Pei.png ./Kevin.png ./Andrew.png" << std::endl << "(This is the default filepath by using '-d' as arg1)" << std::endl << std::endl << "Original source by Tristan Hume. Modified by Matthew Binning." << std::endl; return 0;}
+	if(args[1].compare("-h") == 0){
+		std::cout << std::endl << "Takes a series of pngs from stdin  and returns the coordinates of pupils detected in a human face." << std::endl << "The first argument is the filepath to cascade file (xml) and the following are are number of pngs" << std::endl << std::endl << "Sample use:" << std::endl << "eyeLine ./haarcascade_frontalface_alt.xml ./Matt.png ./Pei.png ./Kevin.png ./Andrew.png" << std::endl << "(This is the default filepath by using '-d' as arg1)" << std::endl << std::endl << "Original source by Tristan Hume. Modified by Matthew Binning." << std::endl; return 0;}
 	if(args[1].compare("-d") == 0) face_cascade_name = "./haarcascade_frontalface_alt.xml";
-	else if(args[1].substr(args[1].size()-4).compare(".xml") != 0){std::cout << std::endl << "Usage: cascade_filepath [image.png...]" << std::endl; return -1;}
+	else if(args[1].substr(args[1].size()-4).compare(".xml") != 0)
+	{
+		std::cout 
+		<< std::endl 
+		<< "Usage: cascade_filepath [image.png...]" 
+		<< std::endl; return -1;
+	}
 	else face_cascade_name = args[1];
 
 	if( !face_cascade.load( face_cascade_name ) ){ printf("Face cascade corrupt.\n"); return -1; };
 
 	createCornerKernels();
 
+	//Parse through frames
 	for(argi = args.begin()+2; argi < args.end(); argi++)
 	{
 		if((*argi).substr((*argi).size()-4).compare(".png") == 0)
