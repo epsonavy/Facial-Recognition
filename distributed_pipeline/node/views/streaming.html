@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<head>
+<title>Streaming</title>
+<script type="text/javascript">
+
+var id = <%- JSON.stringify(id) %>;
+var address = <%- JSON.stringify(address) %>;
+var port = <%- JSON.stringify(port) %>;
+
+var stream = ["None"];
+
+
+
+var videoCount = 0;
+var firstMessage = true;
+
+var streaming = new WebSocket('ws://' + address + ':' + port);
+
+streaming.onopen = function(){
+	streaming.send(id);
+}
+console.log("Ready to go!");
+function parseChunk(name){
+	return name.replace("http://54.193.119.113/static/", "").replace(id  + "_", "").replace(".mp4", "");
+}
+
+streaming.onmessage = function(e){
+	console.log("Received message: " + e.data);
+	if (firstMessage){
+		console.log("Making bucket sort");
+		console.log(e.data);
+		var count = parseInt(e.data);
+		for(var i=0; i<count; i++){
+			stream.push("None");
+		}
+		console.log("Bucket sort length" + stream.length);
+		console.log("Bucket sort complete");
+		firstMessage = false;
+	}else{
+		console.log("Received a video " + e.data);
+		var video_id = parseChunk(e.data);
+		console.log("The video ID " + video_id);
+		stream[parseInt(video_id)] = e.data;
+		nextVideo(); //call this no matter what
+	}
+}
+
+
+
+function nextVideo(){
+	videoPlayer = document.getElementById("myVideo");
+	if(videoPlayer.currentTime < videoPlayer.duration)
+		return;
+	if(stream[videoCount] == null) return;
+	if(stream[videoCount] != "None" && videoCount < stream.length){
+		console.log("Playing video " + stream[videoCount]);
+		var source = document.createElement('source');
+		videoPlayer.setAttribute('src',stream[videoCount]);
+		videoPlayer.load();
+		videoPlayer.play();
+		videoCount++;
+	}
+	
+}
+
+
+
+
+</script>
+</head>
+</head>
+<body>
+  <video id="myVideo" align="center" height="400" width="600" autoplay onended="nextVideo();">   
+        <source id="ss"  src="" type='video/mp4'>
+    </video>
+</body>
+</html>
