@@ -1,5 +1,6 @@
 var pgp = require('pg-promise')();
- 
+
+//Postgres configured for localhost
 var config = {
   user: 'postgres', 
   database: 'postgres',

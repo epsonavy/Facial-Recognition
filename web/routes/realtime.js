@@ -7,6 +7,7 @@ var config = require('../config.js');
 var fs = require('fs');
 var db = require('./db.js');
 
+
 router.post('/', (req, res, next) => {
 	//console.log(req.body.imgBase64);
 	//var base64Data = req.body.imgBase64.replace(/^data:image\/jpeg;base64,/, "");

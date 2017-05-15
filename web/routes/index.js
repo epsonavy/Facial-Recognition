@@ -288,6 +288,7 @@ router.get('/checkUpdate', (req, res, next) => {
   	});
 	}
 
+    //If it is a file, make JSON strings
 		checkIfFile(statusFile, function(err, isFile) {
 			if (isFile) {
 			fs.readFile(statusFile, function (err, context) { 

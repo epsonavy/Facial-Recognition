@@ -8,6 +8,7 @@ var fs = require('fs');
 var db = require('./db.js');
 //var Upload = require('../models/upload.js');
 
+//Ensures necessary directory exists, if not, makes it
 router.post('/', multipartMiddleware, function(req, res) {
     function mkdir(dir) {   
         if (!fs.existsSync(dir)){
