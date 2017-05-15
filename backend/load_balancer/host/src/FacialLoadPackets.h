@@ -1,3 +1,4 @@
+//Defines enumeration of packet states
 enum FacialLoadPacketType
 {
 	Packet = 0x00,
@@ -6,6 +7,7 @@ enum FacialLoadPacketType
 	Done = 0x03
 };
 
+//Defines response codes
 enum FacialLoadResponseCode
 {
 	Initial = 0xF0,
@@ -20,6 +22,7 @@ typedef struct FacialLoadAuthentication FacialLoadAuthentication;
 typedef struct FacialLoadHealth FacialLoadHealth;
 typedef struct FacialLoadDonePacket FacialLoadDonePacket;
 
+//Defines a packet
 struct FacialLoadPacket
 {
 	int size;
@@ -27,12 +30,13 @@ struct FacialLoadPacket
 	FacialLoadResponseCode response;
 };
 
-//I know I'm funny haha
+//Authentication struct
 struct FacialLoadAuthentication
 {
 	int dog;
 };
 
+//Defines the health of the computer running facialload
 struct FacialLoadHealth
 {
 	int mem_usage; // in percentage
@@ -41,6 +45,7 @@ struct FacialLoadHealth
 
 };
 
+//sent when finished
 struct FacialLoadDonePacket
 {
 	unsigned long finished;

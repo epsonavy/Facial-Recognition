@@ -39,6 +39,7 @@ typedef struct FacialLoadPeer{
 int some_array[1000];
 FacialLoadPeer peers[MAX_SERVERS];
 
+//Polls socket, and adds peers and 
 void* accept_thread(void* args){
 	
 	int poll_activity;
@@ -112,6 +113,7 @@ void* accept_thread(void* args){
 	}
 	return NULL;
 }
+
 
 void* reroute_thread(void* args){
 

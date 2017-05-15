@@ -47,6 +47,7 @@ function _checkUploadDir(cb) {
 }
 
 /**
+* checks upload directory, reads it, the writes stream out to it
  */
 function list(stream, meta)  {
     _checkUploadDir(function () {
@@ -57,6 +58,7 @@ function list(stream, meta)  {
 }
 
 /**
+* sends a file
  */
 function request(client, meta) {
     var file = fs.createReadStream(uploadPath + '/' + meta.name);
@@ -65,6 +67,7 @@ function request(client, meta) {
 }
 
 /**
+* allows user to upload a file via stream
  */
 function upload(stream, meta) {
     if (!~supportedTypes.indexOf(meta.type)) {
