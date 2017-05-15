@@ -182,7 +182,6 @@ class MyServerProtocol(WebSocketServerProtocol):
 	def onClose(self, wasClean, code, reason):
 		os.system("sudo rm -r -f /Facial-Recognition/web/realtime_processing/*")
 		os.system("sudo rm -r -f /usr/share/nginx/html/static/*")
-		print "Pei is gay"
 		print "Openface Realtime closed"
 	def onMessage(self, payload, isBinary):
 		global count
