@@ -43,7 +43,7 @@ express-session
 Jade
 pg-promise
 
-#The MIT License (MIT)
+# The MIT License (MIT)
 
 Copyright (c) [2017] [Andrew Levon Ajemian, Matthew Evan Binning, Pei Lian Liu, Long Trinh]
 
